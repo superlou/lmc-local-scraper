@@ -1,4 +1,3 @@
-import re
 import requests
 from bs4 import BeautifulSoup
 from event import Event
@@ -12,6 +11,8 @@ class EventList(BaseModel):
 
 
 class MarloweArtisinalAlesScraper(Scraper):
+    tags = ["ollama"]
+
     def get_upcoming(self):
         r = requests.get("https://www.marloweales.com/hghg")
         soup = BeautifulSoup(r.text, features="html.parser")

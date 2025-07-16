@@ -3,6 +3,8 @@ from event import Event
 
 
 class Scraper:
+    tags = []
+
     def get_upcoming(self) -> list[Event]:
         raise NotImplementedError()
     
