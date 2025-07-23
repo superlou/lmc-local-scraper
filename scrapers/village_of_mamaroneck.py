@@ -1,6 +1,7 @@
 import re
 import requests
 from bs4 import BeautifulSoup
+import icalendar
 from event import Event
 from scraper import Scraper
 
@@ -30,3 +31,20 @@ class VillageOfMamaroneckScraper(Scraper):
             ))
 
         return events
+
+    # The ical for the VOM goes back to 2019 and is very slow to fetch.
+    # def get_upcoming(self) -> list[Event]:
+    #     ical_addr = "http://www.villageofmamaroneckny.gov/calendar/ical/export.ics"
+    #     r = requests.get(
+    #         ical_addr,
+    #         headers={
+    #             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3835.0 Safari/537.36",
+    #             "Accept": "*/*",
+    #         },
+    #     )
+    #     print(r.text)
+    #     print(r)
+
+    #     calendar = icalendar.Calendar.from_ical(r.text)
+    #     for event in calendar.events:
+    #         print(event.get("SUMMARY"))
