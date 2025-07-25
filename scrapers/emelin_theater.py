@@ -1,6 +1,6 @@
 import re
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from scraper import Scraper
 from event import Event
 
@@ -13,30 +13,34 @@ class EmelinTheaterScraper(Scraper):
         html = requests.get(url).text
         soup = BeautifulSoup(html, features="html.parser")
 
-        last_separator = ""
+        month = ""
+        year = ""
 
         events_div = soup.find("div", class_="et_pb_section_1")
+        if not isinstance(events_div, Tag):
+            return []
 
         for article in events_div.find_all("article", class_="act-post"):
+            if not isinstance(article, Tag):
+                continue
+
             title = article.find("h2", class_="entry-title")          
-            name = title.a.string
 
             month_separator = article.find("h2", class_="ecs-events-list-separator-month")
             if month_separator:
-                last_separator = month_separator.string
+                parts = month_separator.get_text().split(",")
+                month = parts[0].strip()
+                year = parts[1].strip()
 
-            day = article.find("div", class_="callout_date").string
-            
-            if excerpt := article.find("p", class_="ecs-excerpt"):
-                desc = excerpt.string.strip()
-            else:
-                desc = ""
+
+            day = article.find("div", class_="callout_date").get_text()
+            desc = article.find("p", class_="ecs-excerpt")
 
             events.append(Event(
                 "Emelin Theater",
-                name,
-                desc,
-                f"{day}, {last_separator}",
+                title.get_text() if title else "",
+                desc.get_text(strip=True) if desc else "",
+                f"{month} {day}, {year}",
                 "Emelin Theater"
             ))
             
