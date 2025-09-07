@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from event import Event
 from ollama import chat, ChatResponse
 from pydantic import BaseModel
+from markdownify import markdownify
 from scraper import Scraper
 
 
@@ -17,7 +18,8 @@ class MarloweArtisinalAlesScraper(Scraper):
         r = requests.get("https://www.marloweales.com/hghg")
         soup = BeautifulSoup(r.text, features="html.parser")
 
-        content = soup.find("div", class_="content").get_text().strip()
+        content = soup.find("div", class_="content").encode_contents()
+        content = markdownify(content)
 
         prompt = ("Extract events from the following HTML that begins after <<<HTML>>>\n"
                 + "List the events in JSON with the following attributes: source, title, desc (description), when (date and time), location\n"
