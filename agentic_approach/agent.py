@@ -1,51 +1,15 @@
 import os
 import pickle
 
-from bs4 import BeautifulSoup
 from devtools import pprint
 from dotenv import load_dotenv
-from markdownify import markdownify
-from pydantic import BaseModel
-import requests
-
+from devtools import debug
 from google import genai
 
+from event import EventsResult
+import simplify_url
+
 load_dotenv()
-
-class Event(BaseModel):
-    title: str
-    description: str
-    when: str
-    location: str
-
-
-class EventsResult(BaseModel):
-    events: list[Event]
-    other_urls: list[str]
-
-
-def get_simplified(url: str, info=False) -> str:
-    if info:
-        print(f"Getting {url}...", end="", flush=True)
-
-    response = requests.get(url, headers={
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
-    })
-    html = response.text
-
-    soup = BeautifulSoup(html, "html.parser")
-    script_tags = soup.find_all("script")
-    for script in script_tags:
-        script.decompose()
-    
-    simplified = soup.body.decode_contents()
-    simplified = markdownify(simplified, strip=["img"])
-
-    if info:
-        print(f"{len(html):,} -> {len(simplified):,} characters.")
-
-    return simplified
-    
 
 
 class EventAgent:
@@ -56,12 +20,15 @@ class EventAgent:
     def find_events(self, url) -> EventsResult:
         print(f"Querying {url}")
 
-        page = get_simplified(url)
+        page = simplify_url.get(url)
 
         query = "In the following markdown description of a webpage, extract all events, identifying their name, description, location, and when they occur.\n"
-        query = "Do not include events that have an unknown or unspecified time or location.\n",
-        query = "USE ONLY INFORMATION IN THE WEBPAGE.\n"
-        query += "If there are URLs that appear to be links to pages that may contain events, list those urls. Do not include links that are NOT likely to contain more events.\n"
+        query += "For all Events, specify dates in YYYY-MM-DD format.\n"
+        query += "For all Events, if there is enough information to estimate the target age for the Event, provide a list of one or more of the following: kids, teens, or adults.\n"
+        query += "Do not include events that have an unknown or unspecified time or location.\n"
+        query += "USE ONLY INFORMATION IN THE WEBPAGE.\n"
+        query += "If there are URLs that appear to be links to pages that may contain events, list those in 'event_urls'.\n"
+        query += "*Do not include links that are NOT likely to contain more events in 'event_urls'.*\n"
         query += "\n"
         query += page
 
@@ -82,6 +49,8 @@ class EventAgent:
 
         result = self.find_events(start_url)
         events += result.events
+        debug(result)
+        return
 
         for url in result.other_urls:
             if url.startswith("mailto:"):
@@ -101,7 +70,8 @@ class EventAgent:
 def main():
     agent = EventAgent()
     # agent.start_from("http://thestemalliance.org")
-    agent.start_from("https://emelin.org/")
+    agent.start_from("https://emelin.org/upcoming-shows/")
+    # agent.start_from("https://www.villageofmamaroneckny.gov/calendar/upcoming")
 
     # get_simplified("http://thestemalliance.org", info=True)
     # get_simplified("https://www.westchester.org/events/converge-25/", info=True)
