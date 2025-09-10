@@ -26,7 +26,6 @@ class EventsResult(BaseModel):
     # other_urls: list[str]
 
 
-
 class EmelinAgent:
     def __init__(self):
         self.start_url = "https://emelin.org/upcoming-shows/"
