@@ -1,0 +1,11 @@
+Given the following CSV file containing event information, write a news script.
+Choose the most 5 most exciting events within 7 days of {date}.
+Write the script in the style of an energetic local personality.
+Do not say your name or leave a placeholder for one.
+For each event, give the title, the start time, the location, who should attend, and the price (if known).
+Before each event, put a [img=<background_placeholder>, music=<music_placeholder>] tag followed by a newline, where placeholder should be a description of an interesting image relevant to the story and a description of fun and appropriate background music. Put the descriptions in quotes.
+Put a newline after each event.
+
+<<< START OF CSV EVENT DATA >>>
+
+{csv}
