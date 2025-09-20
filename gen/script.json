@@ -1,0 +1,31 @@
+{
+    "opening": "Hey there, awesome people! Get ready to mark your calendars because I'm about to drop the hottest event lowdown for the next seven days, starting September 20th! We're talking art, music, and pure fun. Let's dive in!",
+    "stories": [
+        {
+            "text": "First up, kick off your weekend with some serious K-Pop energy! This Saturday, September 20th, at 6:30 PM, head over to MADE: my art + design experience for a K-POP DEMON HUNTERS sing-along paint night! It's a fantastic party with themed art projects, photo ops, and snacks. This event is for kids, teens, and adults, but it's already SOLD OUT! So, if you snagged a ticket, get ready to sing your heart out and paint the night away!",
+            "image_desc": "A vibrant, cartoon-style illustration of a diverse group of people, young and old, happily painting and singing along to music. Bright colors dominate, with subtle, abstract demon-like shapes integrated into the background art. There are musical notes and paint splatters around them.",
+            "music_desc": "Upbeat, catchy K-Pop instrumental music with a driving beat, perfect for a sing-along and creative activity."
+        },
+        {
+            "text": "Next, for the little artists in your life, on Tuesday, September 23rd, at 11:00 AM, MADE: my art + design experience is hosting a DROP-OFF WORKSHOP for a LABUBU mosaic! Kids will get to paint, customize, and tile their very own 12-inch Labubu mosaic with an instructor. This workshop is specifically for kids and costs $67.67. It's a fantastic chance for them to get creative and bring home a unique piece of art!",
+            "image_desc": "A close-up of a child's hands carefully placing small mosaic tiles onto a pre-drawn outline of a playful, cartoon-like monster character. The background shows other colorful art supplies.",
+            "music_desc": "Light, whimsical, and playful instrumental music with a gentle, encouraging tempo, suitable for a children's art workshop."
+        },
+        {
+            "text": "Get ready for more K-Pop inspired fun on Wednesday, September 24th, at 11:00 AM, at MADE: my art + design experience! It's the DROP-OFF WORKSHOP: KPOP DEMON HUNTERS derpy cat! This guided class lets kids, teens, and adults paint a beloved 'derpy cat' on canvas, all while singing along to the K-Pop Demon Hunters soundtrack. This event is also SOLD OUT, so if you're going, prepare for an awesome, artistic experience!",
+            "image_desc": "A cute, slightly goofy-looking cartoon cat, with large, expressive eyes and a paintbrush in its paw, standing in front of a colorful, abstract canvas. K-Pop themed symbols are subtly in the background.",
+            "music_desc": "Another energetic K-Pop track, but with a slightly more laid-back, creative vibe, perfect for painting and singing."
+        },
+        {
+            "text": "For our younger creators, on Thursday, September 25th, at 3:30 PM, MADE: my art + design experience presents the 2025 after school workshops: MIXED MEDIA fall session 1! This 6-week session is perfect for grades 2-6 (kids and teens) to explore all sorts of artistic mediums, including painting, pottery, drawing, and more! The cost is $297.21, and it's a fantastic opportunity to unleash their inner artist!",
+            "image_desc": "A lively collage of various art supplies: paintbrushes, colorful blobs of paint, clay sculpting tools, colored pencils, and paper, all arranged dynamically on a wooden table, suggesting creative exploration.",
+            "music_desc": "Inspirational and uplifting instrumental music with a gentle, flowing melody, evoking a sense of creativity and discovery."
+        },
+        {
+            "text": "And finally, let's get spooky! On Friday, September 26th, at 6:30 PM, join the WEDNESDAY halloween paint night at MADE: my art + design experience! Calling all spooky families to dress in their best black and gothic glam for a night of creepy-cute silkscreens, a photo booth, themed snacks, and the Wednesday soundtrack playing. This event is for kids, teens, and adults and costs $16.99 (pottery purchased separately). Get ready for a frightfully fun evening!",
+            "image_desc": "A gothic-themed silhouette of a haunted house against a moonlit, slightly purple sky, with playful spiderwebs and bats in the foreground. A hint of paint and art supplies is visible at the bottom.",
+            "music_desc": "Mysterious and slightly eerie, yet playful instrumental music, with a walking bassline and some light, whimsical spooky sounds like pizzicato strings or a theremin, fitting a Halloween theme."
+        }
+    ],
+    "closing": "And that wraps up your exciting event roundup for the next week! So many fantastic ways to get creative and have a blast. Make sure to check out the links for more details, and I'll catch you next time with more local happenings! Stay awesome!"
+}
