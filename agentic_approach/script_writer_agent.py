@@ -26,12 +26,14 @@ class ScriptResult(BaseModel):
 
 
 class ScriptWriterAgent:
-    def __init__(self):
-        pass
+    def __init__(self, events: pd.DataFrame):
+        self.events = events
 
-    def run(self, llm: genai.Client, df: pd.DataFrame) -> ScriptResult:
+    def run(self, llm: genai.Client) -> ScriptResult:
         prompt = build_prompt(
-            "agentic_approach/prompts/script_writer.txt", date="9/20/25", csv=df.to_csv()
+            "agentic_approach/prompts/script_writer.txt",
+            date="9/20/25",
+            csv=self.events.to_csv(),
         )
 
         response = llm.models.generate_content(

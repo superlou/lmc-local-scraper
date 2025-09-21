@@ -20,22 +20,21 @@ class Event(BaseModel):
 
 class EventsResult(BaseModel):
     events: list[Event]
-    # other_urls: list[str]
 
 
 class EventListAgent:
-    def __init__(self, start_url: str):
+    def __init__(self, start_url: str, use_selenium: bool = False):
         self.start_url = start_url
         parsed_url = urlparse(self.start_url)
         self.url_base = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        self.use_selenium = use_selenium
 
     def run(
         self,
         llm: genai.Client,
         event_pages_limit: int | None = None,
-        use_selenium: bool = False,
     ) -> EventsResult:
-        start_page = simplify_url.get(self.start_url, use_selenium=use_selenium)
+        start_page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
         print(start_page)
         prompt = build_prompt(
             "agentic_approach/prompts/event_list_start.txt", start_page=start_page
@@ -64,7 +63,7 @@ class EventListAgent:
             if event.link[0] == "/":
                 event.link = self.url_base + event.link
 
-            event_page = simplify_url.get(event.link, use_selenium)
+            event_page = simplify_url.get(event.link, self.use_selenium)
             result = self.update_with_details(llm, event_page, result)
             debug(result)
 

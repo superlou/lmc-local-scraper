@@ -30,44 +30,53 @@ def result_to_df(result: EventsResult) -> pd.DataFrame:
 
 
 def main():
-    # research_events()
-    # write_script()
-    generate_keyframes()
+    research_events()
+    write_script()
+    # make_storyboard()
 
 
 def research_events():
     llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     vom = EventListAgent("https://www.villageofmamaroneckny.gov/calendar/upcoming")
-    result = vom.run(llm, 0)
+    result = vom.run(llm)
     df = result_to_df(result)
     df.to_csv("gen/vom.csv")
 
     emelin = EventListAgent("https://emelin.org/upcoming-shows")
-    result = emelin.run(llm, 2)
+    result = emelin.run(llm)
     df = result_to_df(result)
     df.to_csv("gen/emelin.csv")
 
-    made_art = EventListAgent("https://app.getoccasion.com/p/stacks/1229/15216")
-    result = made_art.run(llm, use_selenium=True)
+    made_art = EventListAgent(
+        "https://app.getoccasion.com/p/stacks/1229/15216",
+        use_selenium=True
+    )
+    result = made_art.run(llm)
     df = result_to_df(result)
     df.to_csv("gen/made_art.csv")
 
-
-def write_script():
-    script_writer = ScriptWriterAgent()
     df = pd.concat(
         [
             pd.read_csv(filename)
             for filename in ["gen/vom.csv", "gen/emelin.csv", "gen/made_art.csv"]
         ]
     )
-    script = script_writer.run(llm, df)
+    df.to_csv("gen/events.csv")
+
+
+def write_script():
+    llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+    df = pd.read_csv("gen/events.csv")
+    script_writer = ScriptWriterAgent(df)
+    script = script_writer.run(llm)
+
     with open("gen/script.json", "w") as script_file:
         script_file.write(script.model_dump_json(indent=4))
 
 
-def generate_keyframes():
+def make_storyboard():
     llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     script = ScriptResult.model_validate_json(open("gen/script.json").read())
