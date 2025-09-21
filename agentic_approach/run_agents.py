@@ -1,3 +1,4 @@
+import argparse
 import os
 
 from devtools import debug
@@ -31,9 +32,18 @@ def result_to_df(result: EventsResult) -> pd.DataFrame:
 
 
 def main():
-    research_events()
-    write_script()
-    # make_storyboard()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("steps", nargs="+")
+    args = parser.parse_args()
+    
+    if "research" in args.steps:
+        research_events()
+    
+    if "write" in args.steps:
+        write_script()
+    
+    if "storyboard" in args.steps:
+        make_storyboard()
 
 
 def research_events():
