@@ -1,31 +1,31 @@
 {
-    "opening": "Hey there, Mamaroneck! Your favorite local guide here, ready to bring you the hottest happenings in and around town! We're talking about events that are gonna make your week sparkle, especially as we dive into late September. I've scoured the listings and picked out the absolute must-dos for the next seven days, starting right now! Get ready to mark your calendars because you won't want to miss a beat!",
+    "opening": "Hey there, Mamaroneck! Get ready to mark your calendars because I've got the scoop on the hottest happenings coming your way! We're talking excitement, creativity, and a whole lot of fun right here in our vibrant community, all within seven days of September 20th! Let's dive in!",
     "stories": [
         {
-            "text": "First up, get ready to unleash your inner artist at the 'LABUBU mosaic' drop-off workshop! If you or your little ones (or even big ones!) love to create, this is for you. Kids, teens, and adults can follow an instructor to paint, customize, and tile their very own 12-inch Labubu mosaic. It's happening on Tuesday, September 23rd at MADE: my art + design experience, and it's just $67.67. What a fun way to get those creative juices flowing!",
-            "image_desc": "A close-up shot of colorful mosaic tiles being carefully placed onto a cartoon-like character shape, with art supplies blurred in the background.",
-            "music_desc": "Upbeat, lighthearted indie-pop music with a playful melody and a hint of whimsical strings."
+            "text": "First up, art lovers and creative kiddos, you are in for a treat! On Tuesday, September 23rd, head over to MADE: My Art and Design experience for a DROP-OFF WORKSHOP: LABUBU mosaic. It kicks off at 3:30 PM, and for just $67.67, your kids can paint, customize, and tile their very own 12-inch Labubu mosaic. It's perfect for inspiring young artists!",
+            "image_desc": "A close-up shot of a child's hands carefully placing colorful mosaic tiles onto a clay figure, with various art supplies scattered around a bright, clean workshop table.",
+            "music_desc": "Upbeat, whimsical instrumental music with a playful synth melody and a light, rhythmic beat, perfect for a creative activity."
         },
         {
-            "text": "Next, for all you K-Pop and anime fans, you absolutely cannot miss the 'KPOP DEMON HUNTERS derpy cat' drop-off workshop! This is where art meets your favorite tunes. You'll be painting a beloved derpy cat on canvas, inspired by the hottest film of the summer, all while listening to the KPOP DEMON HUNTERS soundtrack. It's already sold out for some, so if you can snag a spot, do it! This is for kids, teens, and adults (grades 1 and up) and takes place on Wednesday, September 24th, at MADE: my art + design experience.",
-            "image_desc": "A vibrant, abstract painting of a stylized, cute, 'derpy' cat character with dynamic brushstrokes, set against a background hinting at anime aesthetics.",
-            "music_desc": "Energetic, driving K-pop instrumental music with a strong beat and catchy synth hooks."
+            "text": "Next, for all you trivia masters and brainiacs out there, get ready to flex those mental muscles! Marlowe Artisanal Ales is hosting TRIVIA! every Wednesday night, and that includes Wednesday, September 24th, starting at 7:00 PM. It's absolutely FREE to play, and you can win awesome prizes! Grab your friends and get ready for some friendly competition at 139 Hoyt Ave, Suite A, Mamaroneck.",
+            "image_desc": "A group of adults laughing and collaborating around a table covered with trivia answer sheets and craft beer glasses, with a spotlight on a fun, energetic trivia host in the background.",
+            "music_desc": "A lively, jazzy instrumental with a quick tempo, featuring a playful saxophone or trumpet melody, evoking a pub trivia night."
         },
         {
-            "text": "Calling all trivia buffs! Get your smarty-pants on because 'TRIVIA!' night is happening every Wednesday! Gather your sharpest friends and head over to Marlowe Ales at 7 PM. It's completely FREE to play, and you can win awesome prizes! This is perfect for adults looking for a fun mid-week challenge. Don't miss out on Wednesday, September 24th at 139 Hoyt Ave, Suite A Mamaroneck!",
-            "image_desc": "A spotlight shining on a classic-style microphone with a 'Trivia Night' sign in the background, surrounded by blurred, happy faces of people at tables.",
-            "music_desc": "Lively, upbeat jazz-funk with a walking bass line and playful saxophone riffs, perfect for a pub atmosphere."
+            "text": "Then, on Thursday, September 25th, get ready for a delicious deal that's too good to pass up! It's BURGER NIGHT! at Marlowe Artisanal Ales, located at 139 Hoyt Ave, Suite A in Mamaroneck. For just $20, you can snag a single smash burger and a mug pour of any beer with a mug price. It's the perfect way to unwind after a long day – delicious food and a refreshing drink!",
+            "image_desc": "A mouth-watering close-up of a perfectly grilled smash burger with melted cheese and fresh toppings, next to a frosty mug of craft beer, set in a cozy, warm-lit brewery.",
+            "music_desc": "A laid-back, bluesy rock instrumental with a smooth guitar riff and a steady drum beat, conjuring a relaxed evening at a brewery."
         },
         {
-            "text": "And on Thursday, September 25th, get ready for 'BURGER NIGHT!' at Marlowe Ales! Treat yourself to a delicious single smash burger and a mug pour of any beer with a mug price, all for just $20! It's the perfect way to unwind after a long day and enjoy some great food and drinks. This adult-only event kicks off at 7 PM at 139 Hoyt Ave, Suite A Mamaroneck, NY.",
-            "image_desc": "A mouth-watering close-up of a juicy smash burger with melted cheese and fresh toppings, next to a frosty beer mug.",
-            "music_desc": "Relaxed, bluesy rock and roll with a warm guitar melody and a steady drum beat, great for a casual evening out."
+            "text": "Alright, spooky season is officially upon us, and MADE: My Art and Design Experience has something frightfully fun planned! On Friday, September 26th, join them for a WEDNESDAY halloween paint night! from 5:30 PM to 7:30 PM at their location on 118 W. Boston Post Road. For $16.99 per person, you'll get entry to this creep-tastic event with themed snacks, a photo booth, and the Wednesday soundtrack! Pottery is extra, but the fun is included! Dress in your best black and gothic glam!",
+            "image_desc": "A dimly lit art studio adorned with spiderwebs and whimsical Halloween decorations, with several people of various ages painting spooky-cute pottery, some dressed in dark, stylish outfits.",
+            "music_desc": "A quirky, slightly mysterious, yet fun instrumental track with a strong, rhythmic beat, reminiscent of a kooky, gothic-inspired dance."
         },
         {
-            "text": "And for those who love behind-the-scenes action, make sure you're aware of the 'Board of Trustees Legislative Meeting' on Thursday, September 25th. This is your chance to see how our local government works! It's an important gathering for adults interested in community affairs, starting at 7 PM at the Village of Mamaroneck. Be informed, be involved!",
-            "image_desc": "A formal meeting room with a long table and chairs, a gavel resting on a podium, and soft, professional lighting, conveying a sense of governance.",
-            "music_desc": "Subtle, ambient classical music with a serious yet hopeful tone, featuring light strings and piano."
+            "text": "And finally, for a dose of classic rock that will have you singing along, mark your calendars for Friday, October 3rd, when Bostyx – The Ultimate Tribute to Boston and Styx – takes the stage at the Emelin Theatre! Kicking off at 8:00 PM, located at 153 Library Lane, Mamaroneck. Experience the greatest hits of these legendary bands brought to life with pitch-perfect energy. Tickets range from $44 to $55, and it's a night any rock fan won't want to miss!",
+            "image_desc": "A dynamic stage shot of a tribute band, bathed in vibrant concert lights, with musicians passionately playing guitars and drums, and a lead singer belting out a powerful note, all set against a large, energetic crowd.",
+            "music_desc": "A high-energy, classic rock instrumental with powerful guitar riffs, a strong drum beat, and a soaring synth melody, echoing the sound of iconic 70s rock bands."
         }
     ],
-    "closing": "And that's your exciting rundown for the week, Mamaroneck! From creative workshops to lively trivia, delicious burgers, and important community meetings, there's something for everyone. So get out there, enjoy our amazing town, and I'll catch you next time with more local buzz!"
+    "closing": "And that's your rundown of the most exciting events happening in and around Mamaroneck! Get out there, have a blast, and support our amazing local community! Catch you next time, Mamaroneck!"
 }

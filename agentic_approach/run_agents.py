@@ -31,7 +31,7 @@ def result_to_df(result: EventsResult) -> pd.DataFrame:
 
 
 def main():
-    # research_events()
+    research_events()
     write_script()
     # make_storyboard()
 
@@ -42,11 +42,13 @@ def research_events():
     vom = EventListAgent("https://www.villageofmamaroneckny.gov/calendar/upcoming")
     result = vom.run(llm)
     df = result_to_df(result)
+    df["organization"] = "Village of Mamaroneck"
     df.to_csv("gen/vom.csv")
 
     emelin = EventListAgent("https://emelin.org/upcoming-shows")
     result = emelin.run(llm)
     df = result_to_df(result)
+    df["organization"] = "Emelin Theater"
     df.to_csv("gen/emelin.csv")
 
     made_art = EventListAgent(
@@ -55,11 +57,13 @@ def research_events():
     )
     result = made_art.run(llm)
     df = result_to_df(result)
+    df["organization"] = "MADE: My Art and Design"
     df.to_csv("gen/made_art.csv")
 
     marlowe = FlatEventPageAgent("https://www.marloweales.com/hghg")
     result = marlowe.run(llm)
     df = result_to_df(result)
+    df["organization"] = "Marlowe Artisanal Ales"
     df.to_csv("gen/marlowe.csv")
 
     df = pd.concat(

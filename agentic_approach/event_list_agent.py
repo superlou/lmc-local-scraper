@@ -1,3 +1,4 @@
+from datetime import datetime
 from urllib.parse import urlparse
 
 from devtools import debug
@@ -9,6 +10,7 @@ import simplify_url
 
 
 class Event(BaseModel):
+    organization: str
     title: str
     link: str | None
     description: str
