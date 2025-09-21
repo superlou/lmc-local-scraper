@@ -3,13 +3,14 @@ import os
 
 from devtools import debug
 from dotenv import load_dotenv
+from fpdf import FPDF
 from google import genai
 import pandas as pd
 
 from event_list_agent import EventListAgent, EventsResult
 from flat_event_page_agent import FlatEventPageAgent
 from script_writer_agent import ScriptWriterAgent, ScriptResult
-from storyboard_agent import StoryboardAgent
+from storyboard_agent import StoryboardAgent, StoryboardResult
 
 load_dotenv()
 
@@ -106,7 +107,25 @@ def make_storyboard():
 
     script = ScriptResult.model_validate_json(open("gen/script.json").read())
     storyboard = StoryboardAgent(script, "assets/matt.jpg")
-    storyboard.run(llm)
+    result = storyboard.run(llm)
+
+    with open("gen/storyboard.json", "w") as script_file:
+        script_file.write(result.model_dump_json(indent=4))
+
+    storyboard_to_pdf(StoryboardResult.model_validate_json(open("gen/storyboard.json").read()))
+
+
+def storyboard_to_pdf(storyboard: StoryboardResult):
+    debug(storyboard)
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("helvetica", size=12)
+
+    for take in storyboard.takes:
+        pdf.image(take.frame, h=40)
+        pdf.multi_cell(0, 10, text=take.text, new_x="LMARGIN", new_y="NEXT")
+
+    pdf.output("gen/storyboard.pdf")
 
 
 if __name__ == "__main__":

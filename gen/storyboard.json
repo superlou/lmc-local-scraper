@@ -1,0 +1,32 @@
+{
+    "takes": [
+        {
+            "text": "Hey there, fabulous folks! Get ready to mark your calendars because I've got the scoop on the hottest happenings around town! We're talking excitement, creativity, and good times, all within a week of September 20th, 2025. Let's dive right in!",
+            "frame": "assets/matt.jpg"
+        },
+        {
+            "text": "First up, for all you crafty kids out there, get ready to unleash your inner artist at the LABUBU mosaic drop-off workshop! On September 23rd, head over to MADE: my art + design experience. Kids will get to paint, customize, and tile their very own 12-inch LABUBU mosaic masterpiece! This is perfect for creative youngsters, and it's just $67.67 to join the fun!",
+            "frame": "gen/generated_frame_1.jpg"
+        },
+        {
+            "text": "Next, prepare to put your thinking caps on because on Wednesday, September 24th, it's TRIVIA! night at Marlowe Artisanal Ales! Starting at 7:00 PM, you can test your knowledge, compete for awesome prizes, and it's absolutely free to play! This is a fantastic evening for adults who love a good challenge and great brews at 139 Hoyt Ave, Suite A, Mamaroneck, NY 10543.",
+            "frame": "gen/generated_frame_2.jpg"
+        },
+        {
+            "text": "Calling all KPOP and anime fans! You do NOT want to miss the KPOP DEMON HUNTERS derpy cat drop-off workshop at MADE: my art + design experience on September 24th! While this event is currently sold out, keep an eye out for future workshops because it sounds absolutely epic! Inspired by the hottest film of the summer, kids will paint a beloved derpy cat on canvas while listening to the KPOP DEMON HUNTERS soundtrack. This one was definitely for the creative and musically-inclined kids!",
+            "frame": "gen/generated_frame_3.jpg"
+        },
+        {
+            "text": "Get ready to rock out because on Friday, October 3rd, it's BOSTY X - The Ultimate Tribute to Boston and Styx at the Emelin Theatre! Experience the greatest hits of these legendary bands brought to life with pitch-perfect energy. Shows start at various times, and tickets range from $44 to $55. This is a must-see for all adults who love classic rock and want to relive those iconic stadium anthems at 153 Library Lane, Mamaroneck, NY!",
+            "frame": "gen/generated_frame_4.jpg"
+        },
+        {
+            "text": "And for all you jazz aficionados, prepare for an unforgettable night with Hilary Kole and the Birdland Big Band on Saturday, October 4th, at the Emelin Theatre! Join celebrated jazz vocalist Hilary Kole as she pays homage to Ella Fitzgerald and the jazz greats. Tickets are between $52 and $71, and it's the perfect evening for adults who appreciate world-class jazz. Head to 153 Library Lane, Mamaroneck, NY, for a night of incredible music!",
+            "frame": "gen/generated_frame_5.jpg"
+        },
+        {
+            "text": "And that's your rundown of the most exciting events happening around town! Don't miss out on these incredible opportunities for fun, culture, and community. Get out there and make some memories!",
+            "frame": "assets/matt.jpg"
+        }
+    ]
+}

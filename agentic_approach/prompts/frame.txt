@@ -1,0 +1,2 @@
+Replace the background with an image matching the following description:
+{background_description}
