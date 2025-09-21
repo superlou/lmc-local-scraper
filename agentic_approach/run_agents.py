@@ -6,6 +6,7 @@ from google import genai
 import pandas as pd
 
 from event_list_agent import EventListAgent, EventsResult
+from flat_event_page_agent import FlatEventPageAgent
 from script_writer_agent import ScriptWriterAgent, ScriptResult
 from storyboard_agent import StoryboardAgent
 
@@ -30,7 +31,7 @@ def result_to_df(result: EventsResult) -> pd.DataFrame:
 
 
 def main():
-    research_events()
+    # research_events()
     write_script()
     # make_storyboard()
 
@@ -56,10 +57,20 @@ def research_events():
     df = result_to_df(result)
     df.to_csv("gen/made_art.csv")
 
+    marlowe = FlatEventPageAgent("https://www.marloweales.com/hghg")
+    result = marlowe.run(llm)
+    df = result_to_df(result)
+    df.to_csv("gen/marlowe.csv")
+
     df = pd.concat(
         [
             pd.read_csv(filename)
-            for filename in ["gen/vom.csv", "gen/emelin.csv", "gen/made_art.csv"]
+            for filename in [
+                "gen/vom.csv",
+                "gen/emelin.csv",
+                "gen/made_art.csv",
+                "gen/marlowe.csv",
+            ]
         ]
     )
     df.to_csv("gen/events.csv")

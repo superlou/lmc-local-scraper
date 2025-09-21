@@ -30,14 +30,13 @@ class EventListAgent:
         self.use_selenium = use_selenium
 
     def run(
-        self,
-        llm: genai.Client,
-        event_pages_limit: int | None = None,
+        self, llm: genai.Client, event_pages_limit: int | None = None
     ) -> EventsResult:
         start_page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
-        print(start_page)
         prompt = build_prompt(
-            "agentic_approach/prompts/event_list_start.txt", start_page=start_page
+            "agentic_approach/prompts/event_list_start.txt",
+            start_page=start_page,
+            year=datetime.now().strftime("%Y"),
         )
 
         response = llm.models.generate_content(
@@ -70,7 +69,10 @@ class EventListAgent:
         return result
 
     def update_with_details(
-        self, llm: genai.Client, page: str, result: EventsResult,
+        self,
+        llm: genai.Client,
+        page: str,
+        result: EventsResult,
     ) -> EventsResult:
         prompt = build_prompt(
             "agentic_approach/prompts/event_list_update.txt",
