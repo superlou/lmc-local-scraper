@@ -1,10 +1,12 @@
 import argparse
 import os
+import tomllib
 
 from devtools import debug
 from dotenv import load_dotenv
 from fpdf import FPDF
 from google import genai
+import structlog
 import pandas as pd
 
 from event_list_agent import EventListAgent, EventsResult
@@ -13,6 +15,7 @@ from script_writer_agent import ScriptWriterAgent, ScriptResult
 from storyboard_agent import StoryboardAgent, StoryboardResult
 
 load_dotenv()
+log = structlog.get_logger()
 
 
 def result_to_df(result: EventsResult) -> pd.DataFrame:
@@ -34,72 +37,78 @@ def result_to_df(result: EventsResult) -> pd.DataFrame:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("steps", nargs="+")
+    parser.add_argument("-r", "--research", action="store_true")
+    parser.add_argument("-w", "--write", action="store_true")
+    parser.add_argument("-s", "--storyboard", action="store_true")
+    parser.add_argument("--filter", nargs="+")
+
     args = parser.parse_args()
-    
-    if "research" in args.steps:
-        research_events()
-    
-    if "write" in args.steps:
+
+    if args.research:
+        research_events(filter=args.filter)
+
+    if args.write:
         write_script()
-    
-    if "storyboard" in args.steps:
+
+    if args.storyboard:
         make_storyboard()
 
 
-def research_events():
+def research_events(filter: list[str]):
     llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-    vom = EventListAgent("https://www.villageofmamaroneckny.gov/calendar/upcoming")
-    result = vom.run(llm)
-    df = result_to_df(result)
-    df["organization"] = "Village of Mamaroneck"
-    df.to_csv("gen/vom.csv")
+    all_targets = tomllib.load(open("agentic_approach/research.toml", "rb"))
+    log.info(f"Found {len(all_targets)} research targets")
 
-    emelin = EventListAgent("https://emelin.org/upcoming-shows")
-    result = emelin.run(llm)
-    df = result_to_df(result)
-    df["organization"] = "Emelin Theater"
-    df.to_csv("gen/emelin.csv")
+    if filter and len(filter) > 0:
+        targets = {
+            target: config for target, config in all_targets.items() if target in filter
+        }
+    else:
+        targets = all_targets
 
-    made_art = EventListAgent(
-        "https://app.getoccasion.com/p/stacks/1229/15216",
-        use_selenium=True
-    )
-    result = made_art.run(llm)
-    df = result_to_df(result)
-    df["organization"] = "MADE: My Art and Design"
-    df.to_csv("gen/made_art.csv")
+    log.info(f"Running {len(targets)} research targets")
 
-    marlowe = FlatEventPageAgent("https://www.marloweales.com/hghg")
-    result = marlowe.run(llm)
-    df = result_to_df(result)
-    df["organization"] = "Marlowe Artisanal Ales"
-    df.to_csv("gen/marlowe.csv")
+    for target, config in targets.items():
+        if config["agent"] == "EventListAgent":
+            agent = EventListAgent(
+                config["url"], use_selenium=config.get("use_selenium", False)
+            )
+        elif config["agent"] == "FlatEventPageAgent":
+            agent = FlatEventPageAgent(config["url"])
+        else:
+            log.warning(f"Target {target} specified unknown agent {config['agent']}")
+            continue
 
-    df = pd.concat(
-        [
-            pd.read_csv(filename)
-            for filename in [
-                "gen/vom.csv",
-                "gen/emelin.csv",
-                "gen/made_art.csv",
-                "gen/marlowe.csv",
-            ]
-        ]
-    )
-    df.to_csv("gen/events.csv")
+        log.info(f"Researching {target}")
+        result = agent.run(llm)
+        df = result_to_df(result)
+        df["organization"] = "Village of Mamaroneck"
+        log.info(f"Found {len(df)} events from {target}")
+        df.to_csv(f"gen/{target}.csv")
+
+    filenames = [f"gen/{target}.csv" for target in all_targets.keys()]
+    df = pd.concat([pd.read_csv(filename) for filename in filenames])
+
+    events_path = "gen/events.csv"
+    df.to_csv(events_path)
+    log.info(f"Collected {len(df)} events into {events_path}")
 
 
 def write_script():
     llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     df = pd.read_csv("gen/events.csv")
+    log.info(f"Loaded {len(df)} events to write script.")
     script_writer = ScriptWriterAgent(df)
     script = script_writer.run(llm)
 
-    with open("gen/script.json", "w") as script_file:
+    script_path = "gen/script.json"
+
+    with open(script_path, "w") as script_file:
         script_file.write(script.model_dump_json(indent=4))
+    
+    log.info(f"Script written to {script_path}")
 
 
 def make_storyboard():
@@ -112,7 +121,9 @@ def make_storyboard():
     with open("gen/storyboard.json", "w") as script_file:
         script_file.write(result.model_dump_json(indent=4))
 
-    storyboard_to_pdf(StoryboardResult.model_validate_json(open("gen/storyboard.json").read()))
+    storyboard_to_pdf(
+        StoryboardResult.model_validate_json(open("gen/storyboard.json").read())
+    )
 
 
 def storyboard_to_pdf(storyboard: StoryboardResult):

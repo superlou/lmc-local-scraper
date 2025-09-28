@@ -1,0 +1,20 @@
+[vom]
+agent = "EventListAgent"
+url = "https://www.villageofmamaroneckny.gov/calendar/upcoming"
+organization = "Village of Mamaroneck"
+
+[emelin]
+agent = "EventListAgent"
+url = "https://emelin.org/upcoming-shows"
+organization = "Emelin Theater"
+
+[made_art]
+agent = "EventListAgent"
+url = "https://app.getoccasion.com/p/stacks/1229/15216"
+use_selenium = true
+organization = "MADE: My Art and Design"
+
+[marlowe]
+agent = "FlatEventPageAgent"
+url = "https://www.marloweales.com/hghg"
+organization = "Marlowe Artisanal Ales"
