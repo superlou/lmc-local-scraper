@@ -1,13 +1,16 @@
 import requests
 from bs4 import BeautifulSoup
 from markdownify import markdownify
+import structlog
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
-def get(url: str, use_selenium=False, info=False) -> str:
-    if info:
-        print(f"Getting {url}...", end="", flush=True)
+logger = structlog.get_logger()
+
+
+def get(url: str, use_selenium=False) -> str:
+    log = logger.bind(url=url, use_selenium=use_selenium)
 
     if use_selenium:
         driver = webdriver.Chrome()
@@ -27,8 +30,8 @@ def get(url: str, use_selenium=False, info=False) -> str:
     
     simplified = soup.body.decode_contents() if soup.body else ""
     simplified = markdownify(simplified, strip=["img"])
-
-    if info:
-        print(f"{len(html):,} -> {len(simplified):,} characters.")
+   
+    log = log.bind(html_len=len(html), simplified_len=len(simplified))
+    log.info("Simplified URL get")
 
     return simplified

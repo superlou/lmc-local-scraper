@@ -15,7 +15,7 @@ from script_writer_agent import ScriptWriterAgent, ScriptResult
 from storyboard_agent import StoryboardAgent, StoryboardResult
 
 load_dotenv()
-log = structlog.get_logger()
+logger = structlog.get_logger()
 
 
 def result_to_df(result: EventsResult) -> pd.DataFrame:
@@ -58,7 +58,7 @@ def research_events(filter: list[str]):
     llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     all_targets = tomllib.load(open("agentic_approach/research.toml", "rb"))
-    log.info(f"Found {len(all_targets)} research targets")
+    logger.info(f"Found {len(all_targets)} research targets")
 
     if filter and len(filter) > 0:
         targets = {
@@ -67,7 +67,7 @@ def research_events(filter: list[str]):
     else:
         targets = all_targets
 
-    log.info(f"Running {len(targets)} research targets")
+    logger.info(f"Running {len(targets)} research targets")
 
     for target, config in targets.items():
         if config["agent"] == "EventListAgent":
@@ -77,13 +77,14 @@ def research_events(filter: list[str]):
         elif config["agent"] == "FlatEventPageAgent":
             agent = FlatEventPageAgent(config["url"])
         else:
-            log.warning(f"Target {target} specified unknown agent {config['agent']}")
+            logger.warning(f"Target {target} specified unknown agent {config['agent']}")
             continue
 
-        log.info(f"Researching {target}")
+        logger.info(f"Researching {target}")
         result = agent.run(llm)
         df = result_to_df(result)
         df["organization"] = "Village of Mamaroneck"
+        log = logger.bind(tokens=agent.tokens)
         log.info(f"Found {len(df)} events from {target}")
         df.to_csv(f"gen/{target}.csv")
 
@@ -92,14 +93,14 @@ def research_events(filter: list[str]):
 
     events_path = "gen/events.csv"
     df.to_csv(events_path)
-    log.info(f"Collected {len(df)} events into {events_path}")
+    logger.info(f"Collected {len(df)} events into {events_path}")
 
 
 def write_script():
     llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     df = pd.read_csv("gen/events.csv")
-    log.info(f"Loaded {len(df)} events to write script.")
+    logger.info(f"Loaded {len(df)} events to write script.")
     script_writer = ScriptWriterAgent(df)
     script = script_writer.run(llm)
 
@@ -108,7 +109,7 @@ def write_script():
     with open(script_path, "w") as script_file:
         script_file.write(script.model_dump_json(indent=4))
     
-    log.info(f"Script written to {script_path}")
+    logger.info(f"Script written to {script_path}")
 
 
 def make_storyboard():

@@ -18,3 +18,13 @@ organization = "MADE: My Art and Design"
 agent = "FlatEventPageAgent"
 url = "https://www.marloweales.com/hghg"
 organization = "Marlowe Artisanal Ales"
+
+[sheldrake]
+agent = "EventListAgent"
+url = "https://sheldrakecenter.org/upcoming-events/"
+organization = "Sheldrake Environmental Center"
+
+[larchmont_library]
+agent = "EventListAgent"
+url = "https://larchmont.librarycalendar.com/events/list"
+organization = "Larchmont Public Library"

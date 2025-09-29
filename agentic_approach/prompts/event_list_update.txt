@@ -1,8 +1,8 @@
-The events we know about are in the following JSON structure:\n"
+The known information about the event is in the following JSON structure:\n"
 
-{previous_results}
+{event}
 
-Given these events, use the following information from a webpage encoded in Markdown to add details to the matching event in the previous JSON structure.
+Given this event information, use the following information from a webpage encoded in Markdown to add details to the event.
 
 <<< START OF WEBPAGE >>>
 

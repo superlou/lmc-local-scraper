@@ -1,35 +1,25 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from urllib.parse import urlparse
 
 from devtools import debug
 from google import genai
-from pydantic import BaseModel
+import structlog
 
 from agent_util import build_prompt
+from gemini_event_research_agent import GeminiEventResearchAgent, EventsResult, Event
 import simplify_url
 
-
-class Event(BaseModel):
-    organization: str
-    title: str
-    link: str | None
-    description: str
-    when: str
-    location: str
-    price: str | None
-    target_age: list[str]
+logger = structlog.get_logger()
 
 
-class EventsResult(BaseModel):
-    events: list[Event]
-
-
-class EventListAgent:
+class EventListAgent(GeminiEventResearchAgent):
     def __init__(self, start_url: str, use_selenium: bool = False):
         self.start_url = start_url
         parsed_url = urlparse(self.start_url)
         self.url_base = f"{parsed_url.scheme}://{parsed_url.netloc}"
         self.use_selenium = use_selenium
+        super().__init__()
 
     def run(
         self, llm: genai.Client, event_pages_limit: int | None = None
@@ -40,57 +30,38 @@ class EventListAgent:
             start_page=start_page,
             year=datetime.now().strftime("%Y"),
         )
+        response = self.ask_gemini(llm, "gemini-2.5-flash-lite", prompt, EventsResult)
 
-        response = llm.models.generate_content(
-            model="gemini-2.5-flash-lite",
-            contents=prompt,
-            config=genai.types.GenerateContentConfig(
-                thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
-                response_mime_type="application/json",
-                response_schema=EventsResult,
-            ),
-        )
+        if response is None:
+            return EventsResult(events=[])
+
         result: EventsResult = response.parsed
 
-        for i, event in enumerate(result.events):
-            if event_pages_limit is not None and i >= event_pages_limit:
-                break
-
-            if event.link is None:
-                continue
-
-            print(f"[{i + 1}/{len(result.events)}] Following {event.link}")
-
-            if event.link[0] == "/":
+        for event in result.events:
+            if event.link and event.link[0] == "/":
                 event.link = self.url_base + event.link
 
-            event_page = simplify_url.get(event.link, self.use_selenium)
-            result = self.update_with_details(llm, event_page, result)
-            debug(result)
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            def threaded_update_from_link(params):
+                return self.update_from_link(params[0], params[1])
 
+            updated_events = executor.map(
+                threaded_update_from_link, [(llm, event) for event in result.events]
+            )
+
+        result.events = list(updated_events)
         return result
 
-    def update_with_details(
-        self,
-        llm: genai.Client,
-        page: str,
-        result: EventsResult,
-    ) -> EventsResult:
+    def update_from_link(self, llm: genai.Client, event: Event) -> Event:
+        if event.link is None:
+            return event
+
+        page = simplify_url.get(event.link, self.use_selenium)
         prompt = build_prompt(
             "agentic_approach/prompts/event_list_update.txt",
-            previous_results=result.model_dump_json(),
+            event=event.model_dump_json(),
             page=page,
         )
-
-        response = llm.models.generate_content(
-            model="gemini-2.5-flash-lite",
-            contents=prompt,
-            config=genai.types.GenerateContentConfig(
-                thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
-                response_mime_type="application/json",
-                response_schema=EventsResult,
-            ),
-        )
-
-        new_result: EventsResult = response.parsed
-        return new_result
+        response = self.ask_gemini(llm, "gemini-2.5-flash-lite", prompt, Event)
+        new_event: Event = response.parsed
+        return new_event
