@@ -11,6 +11,7 @@ dependencies = [
     "icalendar>=6.3.1",
     "lxml>=5.3.1",
     "markdownify>=1.2.0",
+    "nicegui>=2.24.2",
     "ollama>=0.4.7",
     "pandas>=2.2.3",
     "pillow>=11.3.0",

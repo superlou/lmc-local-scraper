@@ -83,7 +83,7 @@ def research_events(filter: list[str]):
         logger.info(f"Researching {target}")
         result = agent.run(llm)
         df = result_to_df(result)
-        df["organization"] = "Village of Mamaroneck"
+        df["organization"] = config["organization"]
         log = logger.bind(tokens=agent.tokens)
         log.info(f"Found {len(df)} events from {target}")
         df.to_csv(f"gen/{target}.csv")
