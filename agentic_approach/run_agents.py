@@ -9,6 +9,7 @@ from google import genai
 import structlog
 import pandas as pd
 
+from heygen_agent import HeyGenAgent
 from event_list_agent import EventListAgent, EventsResult
 from flat_event_page_agent import FlatEventPageAgent
 from script_writer_agent import ScriptWriterAgent, ScriptResult
@@ -40,6 +41,7 @@ def main():
     parser.add_argument("-r", "--research", action="store_true")
     parser.add_argument("-w", "--write", action="store_true")
     parser.add_argument("-s", "--storyboard", action="store_true")
+    parser.add_argument("-f", "--film", action="store_true")
     parser.add_argument("--filter", nargs="+")
 
     args = parser.parse_args()
@@ -52,6 +54,9 @@ def main():
 
     if args.storyboard:
         make_storyboard()
+    
+    if args.film:
+        film_segments()
 
 
 def research_events(filter: list[str]):
@@ -138,6 +143,15 @@ def storyboard_to_pdf(storyboard: StoryboardResult):
         pdf.multi_cell(0, 10, text=take.text, new_x="LMARGIN", new_y="NEXT")
 
     pdf.output("gen/storyboard.pdf")
+
+
+def film_segments():
+    storyboard = StoryboardResult.model_validate_json(open("gen/storyboard.json").read())
+
+    heygen = HeyGenAgent(os.environ["HEYGEN_API_KEY"])
+    quota_response = heygen.check_quota()
+    log = logger.bind(response=quota_response)
+    log.info("Checked HeyGen quota")
 
 
 if __name__ == "__main__":
