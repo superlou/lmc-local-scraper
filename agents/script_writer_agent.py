@@ -31,7 +31,7 @@ class ScriptWriterAgent:
 
     def run(self, llm: genai.Client) -> ScriptResult:
         prompt = build_prompt(
-            "agentic_approach/prompts/script_writer.txt",
+            "prompts/script_writer.txt",
             date="9/20/25",
             csv=self.events.to_csv(),
         )

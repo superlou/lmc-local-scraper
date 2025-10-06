@@ -1,11 +1,18 @@
 from typing import Optional
-from dataclasses import dataclass
+
+from pydantic import BaseModel
 
 
-@dataclass
-class Event:
-    source: str
+class Event(BaseModel):
     title: str
-    desc: str
+    link: Optional[str]
+    description: str
     when: str
-    location: Optional[str]
+    location: str
+    price: str
+    target_age: list[str]
+
+
+class EventsResult(BaseModel):
+    events: list[Event]
+    other_urls: list[str]

@@ -4,7 +4,7 @@ from google import genai
 from PIL import Image
 from pydantic import BaseModel
 
-from script_writer_agent import ScriptResult
+from agents.script_writer_agent import ScriptResult
 from agent_util import build_prompt
 
 
@@ -39,7 +39,7 @@ class StoryboardAgent():
     
     def generate_frame(self, llm, background_desc: str, frame_path: str):
         prompt = build_prompt(
-            "agentic_approach/prompts/frame.txt",
+            "prompts/frame.txt",
             background_description=background_desc
         )
 

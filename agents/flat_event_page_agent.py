@@ -5,7 +5,7 @@ from google import genai
 import structlog
 
 from agent_util import build_prompt
-from gemini_event_research_agent import GeminiEventResearchAgent, EventsResult
+from agents.gemini_event_research_agent import GeminiEventResearchAgent, EventsResult
 import simplify_url
 
 
@@ -23,7 +23,7 @@ class FlatEventPageAgent(GeminiEventResearchAgent):
     def run(self, llm: genai.Client) -> EventsResult:
         page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
         prompt = build_prompt(
-            "agentic_approach/prompts/flat_events.txt",
+            "prompts/flat_events.txt",
             page=page,
             link=self.start_url,
             year=datetime.now().strftime("%Y"),

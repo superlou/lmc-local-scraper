@@ -2,12 +2,11 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from urllib.parse import urlparse
 
-from devtools import debug
 from google import genai
 import structlog
 
 from agent_util import build_prompt
-from gemini_event_research_agent import GeminiEventResearchAgent, EventsResult, Event
+from agents.gemini_event_research_agent import GeminiEventResearchAgent, EventsResult, Event
 import simplify_url
 
 logger = structlog.get_logger()
@@ -26,7 +25,7 @@ class EventListAgent(GeminiEventResearchAgent):
     ) -> EventsResult:
         start_page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
         prompt = build_prompt(
-            "agentic_approach/prompts/event_list_start.txt",
+            "prompts/event_list_start.txt",
             start_page=start_page,
             year=datetime.now().strftime("%Y"),
         )
@@ -58,7 +57,7 @@ class EventListAgent(GeminiEventResearchAgent):
 
         page = simplify_url.get(event.link, self.use_selenium)
         prompt = build_prompt(
-            "agentic_approach/prompts/event_list_update.txt",
+            "prompts/event_list_update.txt",
             event=event.model_dump_json(),
             page=page,
         )
