@@ -1,8 +1,9 @@
-In the following markdown description of a webpage, extract all events, identifying their name, description, location, and when they occur.
-For all Events, specify dates in YYYY-MM-DD format.
+In the following markdown description of a webpage, extract all events from {start_date} to {finish_date}.
+For these events, identify their name, description, location, and when they occur.
+For these Events, specify dates in YYYY-MM-DD format.
 The current year is {year}, which should be assumed for dates if the year is not specified.
-For all Events, if there is enough information to estimate the target age for the Event, provide a list of one or more of the following: kids, teens, or adults.
-Do not include events that have an unknown or unspecified time or location.
+For these Events, if there is enough information to estimate the target age for the Event, provide a list of one or more of the following: kids, teens, or adults.
+Exclude events that have an unknown or unspecified time or location.
 
 USE ONLY INFORMATION IN THE WEBPAGE.
 

@@ -1,5 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from urllib.parse import urlparse
 
 from google import genai
@@ -24,10 +25,16 @@ class EventListAgent(GeminiEventResearchAgent):
         self, llm: genai.Client, event_pages_limit: int | None = None
     ) -> EventsResult:
         start_page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
+        
+        now = datetime.now()
+        finish = now + relativedelta(months=1)
+        
         prompt = build_prompt(
             "prompts/event_list_start.txt",
             start_page=start_page,
-            year=datetime.now().strftime("%Y"),
+            year=now.strftime("%Y"),
+            start_date=now.strftime("%Y-%m-%d"),
+            finish_date=finish.strftime("%Y-%m-%d"),
         )
         response = self.ask_gemini(llm, "gemini-2.5-flash-lite", prompt, EventsResult)
 
@@ -49,6 +56,8 @@ class EventListAgent(GeminiEventResearchAgent):
             )
 
         result.events = list(updated_events)
+        import devtools
+        devtools.debug(result.events)
         return result
 
     def update_from_link(self, llm: genai.Client, event: Event) -> Event:
