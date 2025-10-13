@@ -53,7 +53,6 @@ class EventListAgent(GeminiEventResearchAgent):
                     for name, value in self.start_url_params.items()
                 ]
             )
-            print(url)
 
         start_page = simplify_url.get(url, use_selenium=self.use_selenium)
 
@@ -85,9 +84,6 @@ class EventListAgent(GeminiEventResearchAgent):
             )
 
         result.events = list(updated_events)
-        import devtools
-
-        devtools.debug(result.events)
         return result
 
     def update_from_link(self, llm: genai.Client, event: Event) -> Event:

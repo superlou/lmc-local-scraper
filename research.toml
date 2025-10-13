@@ -29,6 +29,12 @@ agent = "EventListAgent"
 url = "https://sheldrakecenter.org/upcoming-events/"
 organization = "Sheldrake Environmental Center"
 
+# [vol] Broken
+# agent = "EventListAgent"
+# url = "https://larchmontny.gov/calendar.php?view=list"
+# organization = "Village of Larchmont"
+# use_selenium = true
+
 [larchmont_library]
 agent = "EventListAgent"
 url = "https://larchmont.librarycalendar.com/events/list"
@@ -41,3 +47,50 @@ organization = "Town of Mamaroneck"
 [tom.url_params]
 startDate = "events_start.strftime('%m/%d/%Y')"
 enddate = "events_finish.strftime('%m/%d/%Y')"
+
+[mamaroneck_artists_guild]
+agent = "FlatEventPageAgent"
+url = "https://mamaroneckartistsguild.org/"
+organization = "Mamaroneck Artist Guild"
+
+[lm_little_league]
+agent = "EventListAgent"
+url = "https://www.lmlittleleague.org/news"
+organization = "Larchmont-Mamaroneck Little League"
+
+[mamaroneck_historical_society]
+agent = "EventListAgent"
+url = "https://www.mamaroneckhistoricalsociety.org/new-events"
+organization = "Mamaroneck Historical Society"
+
+[larchmont_chamber]
+agent = "EventListAgent"
+url = "https://business.larchmontchamber10538.org/events"
+organization = "Larchmont Chamber of Commerce"
+
+[mamaroneck_chamber]
+agent = "FlatEventPageAgent"
+url = "https://mamaroneckchamberofcommerce.org/events-calendar"
+organization = "Mamaroneck Chamber of Commerce"
+
+[larchmont_newcomers]
+agent = "FlatEventPageAgent"
+url = "https://www.larchmontnewcomersclub.com/pages/event-calendar"
+organization = "Larchmont Newcomers Club"
+use_selenium = true
+
+[crc]
+agent = "EventListAgent"
+url = "https://www.crcny.org/events/"
+organization = "Community Resource Center"
+
+[lm_summit]
+agent = "FlatEventPageAgent"
+url = "https://www.localsummitlm.org/events.html"
+organization = "The Larchmont-Mamaroneck Local Summit"
+
+[school_of_rock]
+agent = "EventListAgent"
+url = "https://www.schoolofrock.com/locations/mamaroneck/events"
+organization = "School of Rock Mamaroneck"
+use_selenium = true

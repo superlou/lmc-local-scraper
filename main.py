@@ -56,7 +56,7 @@ def main():
 
     if args.storyboard:
         make_storyboard()
-    
+
     if args.film:
         film_segments()
 
@@ -81,10 +81,13 @@ def research_events(filter: list[str]):
             agent = EventListAgent(
                 config["url"],
                 use_selenium=config.get("use_selenium", False),
-                start_url_params=config.get("url_params", None)
+                start_url_params=config.get("url_params", None),
             )
         elif config["agent"] == "FlatEventPageAgent":
-            agent = FlatEventPageAgent(config["url"])
+            agent = FlatEventPageAgent(
+                config["url"],
+                use_selenium=config.get("use_selenium", False)
+            )
         else:
             logger.warning(f"Target {target} specified unknown agent {config['agent']}")
             continue
@@ -119,7 +122,7 @@ def write_script():
 
     with open(script_path, "w") as script_file:
         script_file.write(script.model_dump_json(indent=4))
-    
+
     logger.info(f"Script written to {script_path}")
 
 
@@ -152,7 +155,9 @@ def storyboard_to_pdf(storyboard: StoryboardResult):
 
 
 def film_segments():
-    storyboard = StoryboardResult.model_validate_json(open("gen/storyboard.json").read())
+    storyboard = StoryboardResult.model_validate_json(
+        open("gen/storyboard.json").read()
+    )
 
     heygen = HeyGenAgent(os.environ["HEYGEN_API_KEY"])
     quota_response = heygen.check_quota()

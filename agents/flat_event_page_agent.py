@@ -30,6 +30,8 @@ class FlatEventPageAgent(GeminiEventResearchAgent):
             link=self.start_url,
             year=datetime.now().strftime("%Y"),
             today=datetime.now().strftime("%Y-%m-%d"),
+            start_date=events_start.strftime("%Y-%m-%d"),
+            finish_date=events_finish.strftime("%Y-%m-%d"),
         )
         response = self.ask_gemini(llm, "gemini-2.5-flash-lite", prompt, EventsResult)
 
