@@ -1,40 +1,68 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 from urllib.parse import urlparse
 
 from google import genai
 import structlog
 
 from agent_util import build_prompt
-from agents.gemini_event_research_agent import GeminiEventResearchAgent, EventsResult, Event
+from agents.gemini_event_research_agent import (
+    GeminiEventResearchAgent,
+    EventsResult,
+    Event,
+)
 import simplify_url
 
 logger = structlog.get_logger()
 
 
 class EventListAgent(GeminiEventResearchAgent):
-    def __init__(self, start_url: str, use_selenium: bool = False):
+    def __init__(
+        self, start_url: str, use_selenium: bool = False, start_url_params=None
+    ):
         self.start_url = start_url
+        self.start_url_params: dict | None = start_url_params
         parsed_url = urlparse(self.start_url)
         self.url_base = f"{parsed_url.scheme}://{parsed_url.netloc}"
         self.use_selenium = use_selenium
         super().__init__()
 
     def run(
-        self, llm: genai.Client, event_pages_limit: int | None = None
+        self,
+        llm: genai.Client,
+        events_start: datetime,
+        events_finish: datetime,
+        event_pages_limit: int | None = None,
     ) -> EventsResult:
-        start_page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
-        
-        now = datetime.now()
-        finish = now + relativedelta(months=1)
-        
+        url = self.start_url
+
+        if self.start_url_params:
+            url += "?" + "&".join(
+                [
+                    name
+                    + "="
+                    + str(
+                        eval(
+                            value,
+                            {
+                                "events_start": events_start,
+                                "events_finish": events_finish,
+                            }
+                        )
+                    )
+                    for name, value in self.start_url_params.items()
+                ]
+            )
+            print(url)
+
+        start_page = simplify_url.get(url, use_selenium=self.use_selenium)
+
         prompt = build_prompt(
             "prompts/event_list_start.txt",
             start_page=start_page,
-            year=now.strftime("%Y"),
-            start_date=now.strftime("%Y-%m-%d"),
-            finish_date=finish.strftime("%Y-%m-%d"),
+            year=events_start.strftime("%Y"),
+            start_date=events_start.strftime("%Y-%m-%d"),
+            finish_date=events_finish.strftime("%Y-%m-%d"),
         )
         response = self.ask_gemini(llm, "gemini-2.5-flash-lite", prompt, EventsResult)
 
@@ -48,6 +76,7 @@ class EventListAgent(GeminiEventResearchAgent):
                 event.link = self.url_base + event.link
 
         with ThreadPoolExecutor(max_workers=8) as executor:
+
             def threaded_update_from_link(params):
                 return self.update_from_link(params[0], params[1])
 
@@ -57,6 +86,7 @@ class EventListAgent(GeminiEventResearchAgent):
 
         result.events = list(updated_events)
         import devtools
+
         devtools.debug(result.events)
         return result
 

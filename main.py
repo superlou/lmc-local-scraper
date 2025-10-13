@@ -1,4 +1,6 @@
 import argparse
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import os
 import tomllib
 
@@ -77,7 +79,9 @@ def research_events(filter: list[str]):
     for target, config in targets.items():
         if config["agent"] == "EventListAgent":
             agent = EventListAgent(
-                config["url"], use_selenium=config.get("use_selenium", False)
+                config["url"],
+                use_selenium=config.get("use_selenium", False),
+                start_url_params=config.get("url_params", None)
             )
         elif config["agent"] == "FlatEventPageAgent":
             agent = FlatEventPageAgent(config["url"])
@@ -86,7 +90,9 @@ def research_events(filter: list[str]):
             continue
 
         logger.info(f"Researching {target}")
-        result = agent.run(llm)
+        now = datetime.now()
+        finish = now + relativedelta(months=1)
+        result = agent.run(llm, now, finish)
         df = result_to_df(result)
         df["organization"] = config["organization"]
         log = logger.bind(tokens=agent.tokens)

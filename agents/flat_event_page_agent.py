@@ -20,7 +20,9 @@ class FlatEventPageAgent(GeminiEventResearchAgent):
         self.use_selenium = use_selenium
         super().__init__()
 
-    def run(self, llm: genai.Client) -> EventsResult:
+    def run(
+        self, llm: genai.Client, events_start: datetime, events_finish: datetime
+    ) -> EventsResult:
         page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
         prompt = build_prompt(
             "prompts/flat_events.txt",
@@ -33,6 +35,6 @@ class FlatEventPageAgent(GeminiEventResearchAgent):
 
         if response is None:
             logger.warn(f"Failed to get events from {self.start_url}")
-        
+
         result: EventsResult = response.parsed
         return result

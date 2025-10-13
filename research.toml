@@ -3,6 +3,11 @@ agent = "EventListAgent"
 url = "https://www.villageofmamaroneckny.gov/calendar/upcoming"
 organization = "Village of Mamaroneck"
 
+[mamaroneck_library]
+agent = "FlatEventPageAgent" # The links are images without text, so no point in traversing
+url = "https://www.mamaronecklibrary.org/events/list/"
+organization = "Mamaroneck Public Library"
+
 [emelin]
 agent = "EventListAgent"
 url = "https://emelin.org/upcoming-shows"
@@ -28,3 +33,11 @@ organization = "Sheldrake Environmental Center"
 agent = "EventListAgent"
 url = "https://larchmont.librarycalendar.com/events/list"
 organization = "Larchmont Public Library"
+
+[tom]
+agent = "EventListAgent"
+url = "https://www.townofmamaroneckny.gov/calendar.aspx"
+organization = "Town of Mamaroneck"
+[tom.url_params]
+startDate = "events_start.strftime('%m/%d/%Y')"
+enddate = "events_finish.strftime('%m/%d/%Y')"
