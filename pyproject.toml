@@ -13,6 +13,7 @@ dependencies = [
     "markdownify>=1.2.0",
     "nicegui>=2.24.2",
     "ollama>=0.4.7",
+    "openai>=2.6.1",
     "pandas>=2.2.3",
     "pillow>=11.3.0",
     "pydantic>=2.11.1",
