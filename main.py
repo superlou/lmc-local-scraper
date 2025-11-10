@@ -1,20 +1,20 @@
 import argparse
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 import os
 import tomllib
+from datetime import datetime
 
+import pandas as pd
+import structlog
+from dateutil.relativedelta import relativedelta
 from devtools import debug
 from dotenv import load_dotenv
 from fpdf import FPDF
 from google import genai
-import structlog
-import pandas as pd
 
-from agents.heygen_agent import HeyGenAgent
 from agents.event_list_agent import EventListAgent, EventsResult
+from agents.film_agent import FilmAgent
 from agents.flat_event_page_agent import FlatEventPageAgent
-from agents.script_writer_agent import ScriptWriterAgent, ScriptResult
+from agents.script_writer_agent import ScriptResult, ScriptWriterAgent
 from agents.storyboard_agent import StoryboardAgent, StoryboardResult
 
 load_dotenv()
@@ -85,8 +85,7 @@ def research_events(filter: list[str]):
             )
         elif config["agent"] == "FlatEventPageAgent":
             agent = FlatEventPageAgent(
-                config["url"],
-                use_selenium=config.get("use_selenium", False)
+                config["url"], use_selenium=config.get("use_selenium", False)
             )
         else:
             logger.warning(f"Target {target} specified unknown agent {config['agent']}")
@@ -159,7 +158,7 @@ def film_segments():
         open("gen/storyboard.json").read()
     )
 
-    heygen = HeyGenAgent(os.environ["HEYGEN_API_KEY"])
+    heygen = FilmAgent(os.environ["HEYGEN_API_KEY"])
     quota_response = heygen.check_quota()
     log = logger.bind(response=quota_response)
     log.info("Checked HeyGen quota")
