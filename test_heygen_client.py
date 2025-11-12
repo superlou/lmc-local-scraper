@@ -10,7 +10,6 @@ from agents.heygen_client import (
     CharacterType,
     CreateAvatarVideoV2Request,
     Dimension,
-    Expression,
     HeyGenClient,
     Scene,
     TalkingStyle,
@@ -38,30 +37,31 @@ def main():
     # print(f"Image ID: {image_id}")
     background_image_id = "1ffaf87a406f45a887800a85f20e3d68"
 
-    # print("Create Avatar V2 video:")
-    # scene = Scene(
-    #     character=Character(
-    #         type=CharacterType.avatar,
-    #         avatar_id="Abigail_expressive_2024112501",
-    #         avatar_style=AvatarStyle.NORMAL,
-    #         talking_style=TalkingStyle.EXPRESSIVE,
-    #     ),
-    #     voice=Voice(
-    #         type=VoiceType.TEXT,
-    #         voice_id="330290724a1b470fb63153f34d4c0183",
-    #         input_text="Get ready to build some spooky fun at the 6th Annual Scarecrow Build on October 4th at 10 AM, happening at Pavilion Field in Harbor Island Park! You can build your own scarecrow – all materials are provided, just bring some old clothes. Resident tickets are $45, and non-residents are $55.",
-    #     ),
-    #     background=Background(
-    #         type=BackgroundType.IMAGE, image_asset_id=background_image_id
-    #     ),
-    # )
-    # request_data = CreateAvatarVideoV2Request(
-    #     title="Test Video",
-    #     dimension=Dimension(width=1280, height=720),
-    #     video_inputs=[scene],
-    # )
-    # response = client.create_avatar_video_v2(request_data)
-    # print(response)
+    if False:
+        print("Create Avatar V2 video:")
+        scene = Scene(
+            character=Character(
+                type=CharacterType.avatar,
+                avatar_id="Abigail_expressive_2024112501",
+                avatar_style=AvatarStyle.NORMAL,
+                talking_style=TalkingStyle.EXPRESSIVE,
+            ),
+            voice=Voice(
+                type=VoiceType.TEXT,
+                voice_id="330290724a1b470fb63153f34d4c0183",
+                input_text="Get ready to build some spooky fun at the 6th Annual Scarecrow Build on October 4th at 10 AM, happening at Pavilion Field in Harbor Island Park! You can build your own scarecrow – all materials are provided, just bring some old clothes. Resident tickets are $45, and non-residents are $55.",
+            ),
+            background=Background(
+                type=BackgroundType.IMAGE, image_asset_id=background_image_id
+            ),
+        )
+        request_data = CreateAvatarVideoV2Request(
+            title="Test Video",
+            dimension=Dimension(width=1280, height=720),
+            video_inputs=[scene],
+        )
+        response = client.create_avatar_video_v2(request_data)
+        print(response)
 
     print("Video status")
     video_id = "a2c2351ed5574e2991852475e9fdce23"

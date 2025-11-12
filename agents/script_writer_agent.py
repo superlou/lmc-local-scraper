@@ -1,5 +1,5 @@
-from google import genai
 import pandas as pd
+from google import genai
 from pydantic import BaseModel
 
 from agent_util import build_prompt

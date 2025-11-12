@@ -1,31 +1,31 @@
 {
     "takes": [
         {
-            "text": "Hey there, fabulous folks! Get ready to mark your calendars because I've got the scoop on the hottest happenings around town! We're talking excitement, creativity, and good times, all within a week of September 20th, 2025. Let's dive right in!",
+            "text": "Hey there, Mamaroneck and Larchmont! Your favorite local guide is back with the hottest happenings around town. Get ready to mark your calendars because we've got a fantastic lineup of events that are sure to bring some sparkle to your week, running from September 20th to September 27th, 2025!",
             "frame": "assets/matt.jpg"
         },
         {
-            "text": "First up, for all you crafty kids out there, get ready to unleash your inner artist at the LABUBU mosaic drop-off workshop! On September 23rd, head over to MADE: my art + design experience. Kids will get to paint, customize, and tile their very own 12-inch LABUBU mosaic masterpiece! This is perfect for creative youngsters, and it's just $67.67 to join the fun!",
+            "text": "First up, get ready to unleash your inner artist at the T-Shirt Design Contest happening at the Mamaroneck Public Library! Starting September 24th, teens can dive into a world of creativity and design their very own masterpiece. It’s free to enter, so grab your pens and let your imagination soar!",
             "frame": "gen/generated_frame_1.jpg"
         },
         {
-            "text": "Next, prepare to put your thinking caps on because on Wednesday, September 24th, it's TRIVIA! night at Marlowe Artisanal Ales! Starting at 7:00 PM, you can test your knowledge, compete for awesome prizes, and it's absolutely free to play! This is a fantastic evening for adults who love a good challenge and great brews at 139 Hoyt Ave, Suite A, Mamaroneck, NY 10543.",
+            "text": "Next, for all you little nature lovers and their grown-ups, get ready for Little Sprouts – Fall Fun at the Sheldrake Environmental Center! Starting Thursday, September 25th, at 10 AM, you can explore 60 acres of protected land, discover local wildlife, and enjoy nature-inspired activities. Best of all, it's absolutely free for two-year-olds with an adult caregiver!",
             "frame": "gen/generated_frame_2.jpg"
         },
         {
-            "text": "Calling all KPOP and anime fans! You do NOT want to miss the KPOP DEMON HUNTERS derpy cat drop-off workshop at MADE: my art + design experience on September 24th! While this event is currently sold out, keep an eye out for future workshops because it sounds absolutely epic! Inspired by the hottest film of the summer, kids will paint a beloved derpy cat on canvas while listening to the KPOP DEMON HUNTERS soundtrack. This one was definitely for the creative and musically-inclined kids!",
+            "text": "On Monday, September 29th, at 10 AM, the Larchmont Public Library is hosting a Drop-in Coloring Hour! Children aged two and up, accompanied by their caregivers, can enjoy a relaxing time with crayons and coloring sheets. No registration needed, just drop in and get colorful!",
             "frame": "gen/generated_frame_3.jpg"
         },
         {
-            "text": "Get ready to rock out because on Friday, October 3rd, it's BOSTY X - The Ultimate Tribute to Boston and Styx at the Emelin Theatre! Experience the greatest hits of these legendary bands brought to life with pitch-perfect energy. Shows start at various times, and tickets range from $44 to $55. This is a must-see for all adults who love classic rock and want to relive those iconic stadium anthems at 153 Library Lane, Mamaroneck, NY!",
+            "text": "Also on Monday, September 29th, at 12 PM, for all you game enthusiasts, head over to the Larchmont Public Library for Open Play Mahjong and Canasta! Whether you're a seasoned player or just know the basics, you're welcome to join. Bring your own sets or use the library's. It's a fantastic way to meet new people and have some fun!",
             "frame": "gen/generated_frame_4.jpg"
         },
         {
-            "text": "And for all you jazz aficionados, prepare for an unforgettable night with Hilary Kole and the Birdland Big Band on Saturday, October 4th, at the Emelin Theatre! Join celebrated jazz vocalist Hilary Kole as she pays homage to Ella Fitzgerald and the jazz greats. Tickets are between $52 and $71, and it's the perfect evening for adults who appreciate world-class jazz. Head to 153 Library Lane, Mamaroneck, NY, for a night of incredible music!",
+            "text": "And finally, to wrap up our exciting week, on Monday, September 29th, at 3:45 PM, the Larchmont Public Library presents Afternoon Stories & Craft! Linnea or Kristi will be leading some fun stories and an accompanying craft for children and their caregivers. Registration is required, so don't miss out on this creative adventure!",
             "frame": "gen/generated_frame_5.jpg"
         },
         {
-            "text": "And that's your rundown of the most exciting events happening around town! Don't miss out on these incredible opportunities for fun, culture, and community. Get out there and make some memories!",
+            "text": "That's all for this week's event roundup! Get out there, have a blast, and make some amazing memories in our wonderful community. We'll catch you next time with more exciting events!",
             "frame": "assets/matt.jpg"
         }
     ]

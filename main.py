@@ -144,7 +144,8 @@ def storyboard_to_pdf(storyboard: StoryboardResult):
     debug(storyboard)
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("helvetica", size=12)
+    pdf.add_font("NotoSans", "", "assets/NotoSans-Regular.ttf")
+    pdf.set_font("NotoSans", size=12)
 
     for take in storyboard.takes:
         pdf.image(take.frame, h=40)
