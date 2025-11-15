@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -199,13 +200,15 @@ class HeyGenClient:
 
         return VideoStatusResponse.model_validate(response.json())
 
-    def upload_asset(self, image_path: str, name: str):
-        with open(image_path, "rb") as image_file:
+    def upload_asset(self, asset_path: str, name: str):
+        ext = Path(asset_path).suffix
+
+        with open(asset_path, "rb") as image_file:
             response = requests.post(
                 "https://upload.heygen.com/v1/asset",
                 data=image_file,
                 params={"name": name},
-                headers={"Content-Type": "image/png"} | self.headers,
+                headers={"Content-Type": f"image/{ext}"} | self.headers,
             )
 
             return response.json()

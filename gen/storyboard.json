@@ -2,7 +2,7 @@
     "takes": [
         {
             "text": "Hey there, Mamaroneck and Larchmont! Your favorite local guide is back with the hottest happenings around town. Get ready to mark your calendars because we've got a fantastic lineup of events that are sure to bring some sparkle to your week, running from September 20th to September 27th, 2025!",
-            "frame": "assets/matt.jpg"
+            "frame": "assets/studio_background.png"
         },
         {
             "text": "First up, get ready to unleash your inner artist at the T-Shirt Design Contest happening at the Mamaroneck Public Library! Starting September 24th, teens can dive into a world of creativity and design their very own masterpiece. It’s free to enter, so grab your pens and let your imagination soar!",
@@ -26,7 +26,7 @@
         },
         {
             "text": "That's all for this week's event roundup! Get out there, have a blast, and make some amazing memories in our wonderful community. We'll catch you next time with more exciting events!",
-            "frame": "assets/matt.jpg"
+            "frame": "assets/studio_background.png"
         }
     ]
 }

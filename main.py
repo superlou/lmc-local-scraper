@@ -129,7 +129,7 @@ def make_storyboard():
     llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
     script = ScriptResult.model_validate_json(open("gen/script.json").read())
-    storyboard = StoryboardAgent(script, "assets/matt.jpg")
+    storyboard = StoryboardAgent(script, "assets/studio_background.png")
     result = storyboard.run(llm)
 
     with open("gen/storyboard.json", "w") as script_file:
@@ -159,10 +159,16 @@ def film_segments():
         open("gen/storyboard.json").read()
     )
 
-    heygen = FilmAgent(os.environ["HEYGEN_API_KEY"])
-    quota_response = heygen.check_quota()
-    log = logger.bind(response=quota_response)
-    log.info("Checked HeyGen quota")
+    heygen = FilmAgent(
+        os.environ["HEYGEN_API_KEY"],
+        storyboard.takes[0].text,
+        storyboard.takes[0].frame,
+        "gen/intro.mp4",
+    )
+    # quota_response = heygen.check_quota()
+    # log = logger.bind(response=quota_response)
+    # log.info("Checked HeyGen quota")
+    heygen.run()
 
 
 if __name__ == "__main__":
