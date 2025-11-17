@@ -201,7 +201,7 @@ class HeyGenClient:
         return VideoStatusResponse.model_validate(response.json())
 
     def upload_asset(self, asset_path: str, name: str):
-        ext = Path(asset_path).suffix
+        ext = Path(asset_path).suffix[1:]
 
         with open(asset_path, "rb") as image_file:
             response = requests.post(

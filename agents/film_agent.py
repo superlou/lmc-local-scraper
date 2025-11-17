@@ -23,7 +23,7 @@ class FilmAgent:
         self.background_path = background_path
         self.output_path = output_path
 
-    def run(self):
+    def run(self) -> str | None:
         asset_name = Path(self.background_path).name
         print(f"Uploading background asset: {asset_name}")
         response = self.client.upload_asset(self.background_path, asset_name)
@@ -55,8 +55,7 @@ class FilmAgent:
         response = self.client.create_avatar_video_v2(request_data)
         print(response)
 
-        # Wait for the response to say it's done!
-        # tbd
-
         print(f"Deleting Asset ID: {background_asset_id}")
         self.client.delete_asset(background_asset_id)
+
+        return response.data.video_id

@@ -1,19 +1,26 @@
 import argparse
+import json
 import os
+import time
 import tomllib
 from datetime import datetime
+from glob import glob
 
 import pandas as pd
+import requests
 import structlog
 from dateutil.relativedelta import relativedelta
 from devtools import debug
 from dotenv import load_dotenv
 from fpdf import FPDF
 from google import genai
+from google.genai.types import VideoGenerationMaskDict
+from pydantic import ValidationError
 
 from agents.event_list_agent import EventListAgent, EventsResult
 from agents.film_agent import FilmAgent
 from agents.flat_event_page_agent import FlatEventPageAgent
+from agents.heygen_client import HeyGenClient, VideoStatusResponse
 from agents.script_writer_agent import ScriptResult, ScriptWriterAgent
 from agents.storyboard_agent import StoryboardAgent, StoryboardResult
 
@@ -58,7 +65,7 @@ def main():
         make_storyboard()
 
     if args.film:
-        film_segments()
+        film_clips()
 
 
 def research_events(filter: list[str]):
@@ -154,21 +161,79 @@ def storyboard_to_pdf(storyboard: StoryboardResult):
     pdf.output("gen/storyboard.pdf")
 
 
-def film_segments():
+def film_clips():
+    client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
+    quota_response = client.check_quota()
+    log = logger.bind(response=quota_response)
+    log.info("Checked HeyGen quota")
+
     storyboard = StoryboardResult.model_validate_json(
         open("gen/storyboard.json").read()
     )
 
-    heygen = FilmAgent(
-        os.environ["HEYGEN_API_KEY"],
-        storyboard.takes[0].text,
-        storyboard.takes[0].frame,
-        "gen/intro.mp4",
-    )
-    # quota_response = heygen.check_quota()
-    # log = logger.bind(response=quota_response)
-    # log.info("Checked HeyGen quota")
-    heygen.run()
+    # for i, take in enumerate(storyboard.takes[:1]):  # tbd Run all
+    #     agent = FilmAgent(
+    #         os.environ["HEYGEN_API_KEY"],
+    #         storyboard.takes[0].text,
+    #         storyboard.takes[0].frame,
+    #         "gen/intro.mp4",
+    #     )
+    #     video_id = agent.run()
+
+    #     video_process = {
+    #         "clip": i,
+    #         "processor": "HeyGen Avatar V2",
+    #         "video_id": video_id,
+    #     }
+    #     json.dump(video_process, open(f"gen/clip_{i}.txt", "w"), indent=4)
+
+    wait_for_generation = True
+
+    while wait_for_generation:
+        time.sleep(5)
+        wait_for_generation = False
+
+        clip_files = sorted(glob("gen/clip_*.txt"))
+
+        for video_process_file in clip_files:
+            video_process = json.load(open(video_process_file))
+            video_id = video_process["video_id"]
+
+            try:
+                response = client.get_video_status(video_id)
+                # response = VideoStatusResponse(code=100, data={"status": "completed"})
+                status = response.data["status"]
+                video_url = response.data["video_url"]
+                print(f"Clip {video_process['clip']}: {status}, {video_url}")
+                if status != "completed":
+                    wait_for_generation = True
+            except ValidationError:
+                pass
+
+        print()
+
+    # Download all video clips
+    clip_files = sorted(glob("gen/clip_*.txt"))
+
+    for video_process_file in clip_files:
+        video_process = json.load(open(video_process_file))
+        video_id = video_process["video_id"]
+        clip = video_process["clip"]
+
+        response = client.get_video_status(video_id)
+        status = response.data["status"]
+        video_url = response.data["video_url"]
+
+        try:
+            print(f"Downloading clip {clip}...")
+            response = requests.get(video_url, stream=True)
+            with open(f"gen/clip_{clip}.mp4", "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+        except requests.exceptions.RequestException as e:
+            print("Error downloading file.")
+        except IOError as e:
+            print("Error saving file.")
 
 
 if __name__ == "__main__":
