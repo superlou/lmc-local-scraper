@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 from fpdf import FPDF
 from google import genai
 from google.genai.types import VideoGenerationMaskDict
+from moviepy import VideoFileClip, concatenate_videoclips
 from pydantic import ValidationError
 
 from agents.event_list_agent import EventListAgent, EventsResult
@@ -51,6 +52,7 @@ def main():
     parser.add_argument("-w", "--write", action="store_true")
     parser.add_argument("-s", "--storyboard", action="store_true")
     parser.add_argument("-f", "--film", action="store_true")
+    parser.add_argument("-p", "--produce", action="store_true")
     parser.add_argument("--filter", nargs="+")
 
     args = parser.parse_args()
@@ -66,6 +68,9 @@ def main():
 
     if args.film:
         film_clips()
+
+    if args.produce:
+        produce_video()
 
 
 def research_events(filter: list[str]):
@@ -171,26 +176,28 @@ def film_clips():
         open("gen/storyboard.json").read()
     )
 
-    # for i, take in enumerate(storyboard.takes[:1]):  # tbd Run all
-    #     agent = FilmAgent(
-    #         os.environ["HEYGEN_API_KEY"],
-    #         storyboard.takes[0].text,
-    #         storyboard.takes[0].frame,
-    #         "gen/intro.mp4",
-    #     )
-    #     video_id = agent.run()
+    for take in storyboard.takes:
+        agent = FilmAgent(
+            os.environ["HEYGEN_API_KEY"],
+            take.text,
+            take.frame,
+            "gen/intro.mp4",
+        )
+        video_id = agent.run()
 
-    #     video_process = {
-    #         "clip": i,
-    #         "processor": "HeyGen Avatar V2",
-    #         "video_id": video_id,
-    #     }
-    #     json.dump(video_process, open(f"gen/clip_{i}.txt", "w"), indent=4)
+        video_process = {
+            "clip": take.id,
+            "processor": "HeyGen Avatar V2",
+            "video_id": video_id,
+        }
+        json.dump(video_process, open(f"gen/clip_{take.id}.txt", "w"), indent=4)
 
     wait_for_generation = True
 
+    # todo Get smarter about checking videos that already completed.
+    # Download them as soon as they're ready.
     while wait_for_generation:
-        time.sleep(5)
+        time.sleep(10)
         wait_for_generation = False
 
         clip_files = sorted(glob("gen/clip_*.txt"))
@@ -234,6 +241,15 @@ def film_clips():
             print("Error downloading file.")
         except IOError as e:
             print("Error saving file.")
+
+
+def produce_video():
+    clip_files = sorted(glob("gen/clip_*.mp4"))
+    clips = [VideoFileClip(clip_file) for clip_file in clip_files]
+    video = concatenate_videoclips(clips)
+    print("Writing final video...")
+    video.write_videofile("gen/video.mp4")
+    print("done.")
 
 
 if __name__ == "__main__":
