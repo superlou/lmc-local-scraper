@@ -10,6 +10,7 @@ from loguru import logger
 
 from agents.event_list_agent import EventListAgent, EventsResult
 from agents.flat_event_page_agent import FlatEventPageAgent
+from agents.script_writer_agent import ScriptWriterAgent
 
 
 class Producer:
@@ -65,6 +66,21 @@ class Producer:
         events_path = self.path / "events.csv"
         df.to_csv(events_path)
         logger.info(f"Collected {len(df)} events into {events_path}")
+
+    def write_script(self):
+        llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+        df = pd.read_csv(self.path / "events.csv")
+        logger.info(f"Loaded {len(df)} events to write script.")
+        script_writer = ScriptWriterAgent(df)
+        script = script_writer.run(llm)
+
+        script_path = self.path / "script.json"
+
+        with open(script_path, "w") as script_file:
+            script_file.write(script.model_dump_json(indent=4))
+
+        logger.info(f"Script written to {script_path}")
 
 
 def result_to_df(result: EventsResult) -> pd.DataFrame:

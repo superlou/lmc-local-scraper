@@ -54,8 +54,8 @@ def main():
         all_targets = tomllib.load(open("research.toml", "rb"))
         producer.research_events(all_targets, args.filter)
 
-    # if args.write:
-    #     write_script()
+    if args.write:
+        producer.write_script()
 
     # if args.storyboard:
     #     make_storyboard()
@@ -65,22 +65,6 @@ def main():
 
     # if args.produce:
     #     produce_video()
-
-
-def write_script():
-    llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-
-    df = pd.read_csv("gen/events.csv")
-    logger.info(f"Loaded {len(df)} events to write script.")
-    script_writer = ScriptWriterAgent(df)
-    script = script_writer.run(llm)
-
-    script_path = "gen/script.json"
-
-    with open(script_path, "w") as script_file:
-        script_file.write(script.model_dump_json(indent=4))
-
-    logger.info(f"Script written to {script_path}")
 
 
 def make_storyboard():

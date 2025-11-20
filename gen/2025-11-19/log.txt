@@ -214,3 +214,6 @@ FileNotFoundError: [Errno 2] No such file or directory: 'gen/2025-11-19/events_v
 2025-11-19 20:01:43.336 | INFO     | simplify_url:get:32 - Simplified get https://www.schoolofrock.com/locations/mamaroneck/events - original: 75,538, simplified: 9,296, use_selenium: True
 2025-11-19 20:01:44.277 | INFO     | producer:research_events:59 - Found 1 events from school_of_rock
 2025-11-19 20:01:44.294 | INFO     | producer:research_events:67 - Collected 108 events into gen/2025-11-19/events.csv
+2025-11-19 20:09:01.827 | INFO     | __main__:main:49 - Working in gen/2025-11-19
+2025-11-19 20:09:01.911 | INFO     | producer:write_script:74 - Loaded 108 events to write script.
+2025-11-19 20:09:07.738 | INFO     | producer:write_script:83 - Script written to gen/2025-11-19/script.json

@@ -1,4 +1,5 @@
 .env
+gen/
 
 # Python-generated files
 __pycache__/
