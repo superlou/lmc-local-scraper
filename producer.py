@@ -1,16 +1,17 @@
 import os
 from datetime import datetime
-from glob import glob
 from pathlib import Path
 
 import pandas as pd
 from dateutil.relativedelta import relativedelta
+from fpdf import FPDF
 from google import genai
 from loguru import logger
 
 from agents.event_list_agent import EventListAgent, EventsResult
 from agents.flat_event_page_agent import FlatEventPageAgent
-from agents.script_writer_agent import ScriptWriterAgent
+from agents.script_writer_agent import ScriptResult, ScriptWriterAgent
+from agents.storyboard_agent import StoryboardAgent, StoryboardResult
 
 
 class Producer:
@@ -81,6 +82,45 @@ class Producer:
             script_file.write(script.model_dump_json(indent=4))
 
         logger.info(f"Script written to {script_path}")
+
+    def make_storyboard(self):
+        llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+        script_path = self.path / "script.json"
+        script = ScriptResult.model_validate_json(open(script_path).read())
+        logger.info(f"Loaded script from {script_path}")
+
+        storyboard = StoryboardAgent(script, "assets/studio_background.png", self.path)
+        result = storyboard.run(llm)
+
+        storyboard_path = self.path / "storyboard.json"
+
+        with open(storyboard_path, "w") as storyboard_file:
+            storyboard_file.write(result.model_dump_json(indent=4))
+
+        logger.info(f"Wrote storyboard to {storyboard_path}")
+
+        storyboard_pdf_path = self.path / "storyboard.pdf"
+
+        storyboard_to_pdf(
+            StoryboardResult.model_validate_json(open(storyboard_path).read()),
+            storyboard_pdf_path,
+        )
+
+        logger.info(f"Created storyboard PDF at {storyboard_path}")
+
+
+def storyboard_to_pdf(storyboard: StoryboardResult, output: Path):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.add_font("NotoSans", "", "assets/NotoSans-Regular.ttf")
+    pdf.set_font("NotoSans", size=12)
+
+    for take in storyboard.takes:
+        pdf.image(take.frame, h=40)
+        pdf.multi_cell(0, 10, text=take.text, new_x="LMARGIN", new_y="NEXT")
+
+    pdf.output(str(output))
 
 
 def result_to_df(result: EventsResult) -> pd.DataFrame:

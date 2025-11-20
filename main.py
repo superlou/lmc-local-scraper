@@ -8,18 +8,14 @@ from glob import glob
 from pathlib import Path
 
 import requests
-from devtools import debug
 from dotenv import load_dotenv
-from fpdf import FPDF
-from google import genai
 from loguru import logger
 from moviepy import VideoFileClip, concatenate_videoclips
 from pydantic import ValidationError
 
 from agents.film_agent import FilmAgent
 from agents.heygen_client import HeyGenClient
-from agents.script_writer_agent import ScriptResult
-from agents.storyboard_agent import StoryboardAgent, StoryboardResult
+from agents.storyboard_agent import StoryboardResult
 from producer import Producer
 
 load_dotenv()
@@ -56,43 +52,14 @@ def main():
     if args.write:
         producer.write_script(3)
 
-    # if args.storyboard:
-    #     make_storyboard()
+    if args.storyboard:
+        producer.make_storyboard()
 
     # if args.film:
     #     film_clips()
 
     # if args.produce:
     #     produce_video()
-
-
-def make_storyboard():
-    llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-
-    script = ScriptResult.model_validate_json(open("gen/script.json").read())
-    storyboard = StoryboardAgent(script, "assets/studio_background.png")
-    result = storyboard.run(llm)
-
-    with open("gen/storyboard.json", "w") as script_file:
-        script_file.write(result.model_dump_json(indent=4))
-
-    storyboard_to_pdf(
-        StoryboardResult.model_validate_json(open("gen/storyboard.json").read())
-    )
-
-
-def storyboard_to_pdf(storyboard: StoryboardResult):
-    debug(storyboard)
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.add_font("NotoSans", "", "assets/NotoSans-Regular.ttf")
-    pdf.set_font("NotoSans", size=12)
-
-    for take in storyboard.takes:
-        pdf.image(take.frame, h=40)
-        pdf.multi_cell(0, 10, text=take.text, new_x="LMARGIN", new_y="NEXT")
-
-    pdf.output("gen/storyboard.pdf")
 
 
 def film_clips():

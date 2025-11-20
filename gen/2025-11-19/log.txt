@@ -223,3 +223,14 @@ FileNotFoundError: [Errno 2] No such file or directory: 'gen/2025-11-19/events_v
 2025-11-19 20:14:26.506 | INFO     | __main__:main:48 - Working in gen/2025-11-19
 2025-11-19 20:14:26.594 | INFO     | producer:write_script:74 - Loaded 108 events to write script.
 2025-11-19 20:14:31.460 | INFO     | producer:write_script:83 - Script written to gen/2025-11-19/script.json
+2025-11-19 20:28:30.404 | INFO     | __main__:main:44 - Working in gen/2025-11-19
+2025-11-19 20:28:30.487 | INFO     | producer:make_storyboard:91 - Loaded script from gen/2025-11-19/script.json
+2025-11-19 20:28:53.069 | INFO     | producer:make_storyboard:101 - Wrote storyboard to gen/2025-11-19/storyboard.json
+2025-11-19 20:28:53.327 | INFO     | producer:make_storyboard:110 - Created storyboard PDF at gen/2025-11-19/storyboard.json
+2025-11-19 20:33:32.836 | INFO     | __main__:main:44 - Working in gen/2025-11-19
+2025-11-19 20:33:32.918 | INFO     | producer:make_storyboard:91 - Loaded script from gen/2025-11-19/script.json
+2025-11-19 20:33:32.921 | INFO     | agents.storyboard_agent:run:41 - Generating frame 1/3: gen/2025-11-19/generated_frame_1.jpg
+2025-11-19 20:33:40.815 | INFO     | agents.storyboard_agent:run:41 - Generating frame 2/3: gen/2025-11-19/generated_frame_2.jpg
+2025-11-19 20:33:47.380 | INFO     | agents.storyboard_agent:run:41 - Generating frame 3/3: gen/2025-11-19/generated_frame_3.jpg
+2025-11-19 20:33:54.206 | INFO     | producer:make_storyboard:101 - Wrote storyboard to gen/2025-11-19/storyboard.json
+2025-11-19 20:33:54.470 | INFO     | producer:make_storyboard:110 - Created storyboard PDF at gen/2025-11-19/storyboard.json
