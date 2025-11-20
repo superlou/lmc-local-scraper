@@ -5,120 +5,66 @@ import time
 import tomllib
 from datetime import datetime
 from glob import glob
+from pathlib import Path
 
 import pandas as pd
 import requests
-import structlog
-from dateutil.relativedelta import relativedelta
 from devtools import debug
 from dotenv import load_dotenv
 from fpdf import FPDF
 from google import genai
-from google.genai.types import VideoGenerationMaskDict
+from loguru import logger
 from moviepy import VideoFileClip, concatenate_videoclips
 from pydantic import ValidationError
 
-from agents.event_list_agent import EventListAgent, EventsResult
 from agents.film_agent import FilmAgent
-from agents.flat_event_page_agent import FlatEventPageAgent
-from agents.heygen_client import HeyGenClient, VideoStatusResponse
+from agents.heygen_client import HeyGenClient
 from agents.script_writer_agent import ScriptResult, ScriptWriterAgent
 from agents.storyboard_agent import StoryboardAgent, StoryboardResult
+from producer import Producer
 
 load_dotenv()
-logger = structlog.get_logger()
 
 
-def result_to_df(result: EventsResult) -> pd.DataFrame:
-    return pd.DataFrame(
-        [
-            {
-                "event": event.title,
-                "link": event.link,
-                "description": event.description,
-                "when": event.when,
-                "location": event.location,
-                "price": event.price,
-                "target_age": ", ".join(event.target_age),
-            }
-            for event in result.events
-        ]
-    )
-
-
+@logger.catch
 def main():
+    logger.add("gen/log.txt")
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--research", action="store_true")
     parser.add_argument("-w", "--write", action="store_true")
     parser.add_argument("-s", "--storyboard", action="store_true")
     parser.add_argument("-f", "--film", action="store_true")
     parser.add_argument("-p", "--produce", action="store_true")
+    parser.add_argument(
+        "--working-dir", default="gen/" + datetime.now().strftime("%Y-%m-%d")
+    )
     parser.add_argument("--filter", nargs="+")
 
     args = parser.parse_args()
 
+    working_dir = Path(args.working_dir)
+    working_dir.mkdir(exist_ok=True)
+    logger.add(working_dir / "log.txt")
+    logger.info(f"Working in {working_dir}")
+
+    producer = Producer(working_dir)
+
     if args.research:
-        research_events(filter=args.filter)
+        all_targets = tomllib.load(open("research.toml", "rb"))
+        producer.research_events(all_targets, args.filter)
 
-    if args.write:
-        write_script()
+    # if args.write:
+    #     write_script()
 
-    if args.storyboard:
-        make_storyboard()
+    # if args.storyboard:
+    #     make_storyboard()
 
-    if args.film:
-        film_clips()
+    # if args.film:
+    #     film_clips()
 
-    if args.produce:
-        produce_video()
-
-
-def research_events(filter: list[str]):
-    llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-
-    all_targets = tomllib.load(open("research.toml", "rb"))
-    logger.info(f"Found {len(all_targets)} research targets")
-
-    if filter and len(filter) > 0:
-        targets = {
-            target: config for target, config in all_targets.items() if target in filter
-        }
-    else:
-        targets = all_targets
-
-    logger.info(f"Running {len(targets)} research targets")
-
-    for target, config in targets.items():
-        if config["agent"] == "EventListAgent":
-            agent = EventListAgent(
-                config["url"],
-                use_selenium=config.get("use_selenium", False),
-                start_url_params=config.get("url_params", None),
-            )
-        elif config["agent"] == "FlatEventPageAgent":
-            agent = FlatEventPageAgent(
-                config["url"], use_selenium=config.get("use_selenium", False)
-            )
-        else:
-            logger.warning(f"Target {target} specified unknown agent {config['agent']}")
-            continue
-
-        logger.info(f"Researching {target}")
-        now = datetime.now()
-        finish = now + relativedelta(months=1)
-        result = agent.run(llm, now, finish)
-        df = result_to_df(result)
-        df["organization"] = config["organization"]
-        log = logger.bind(tokens=agent.tokens)
-        log.info(f"Found {len(df)} events from {target}")
-        df.to_csv(f"gen/{target}.csv")
-
-    filenames = [f"gen/{target}.csv" for target in all_targets.keys()]
-    df = pd.concat([pd.read_csv(filename) for filename in filenames])
-
-    events_path = "gen/events.csv"
-    df.to_csv(events_path)
-    logger.info(f"Collected {len(df)} events into {events_path}")
+    # if args.produce:
+    #     produce_video()
 
 
 def write_script():
@@ -169,8 +115,7 @@ def storyboard_to_pdf(storyboard: StoryboardResult):
 def film_clips():
     client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
     quota_response = client.check_quota()
-    log = logger.bind(response=quota_response)
-    log.info("Checked HeyGen quota")
+    logger.info("Checked HeyGen quota", response=quota_response)
 
     storyboard = StoryboardResult.model_validate_json(
         open("gen/storyboard.json").read()
