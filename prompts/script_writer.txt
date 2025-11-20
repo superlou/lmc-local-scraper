@@ -1,5 +1,5 @@
 Given the following CSV file containing event information, write a news script.
-Choose the most 5 most exciting events within 7 days of {date}.
+Choose the {num_events} most exciting events within 7 days of {date}.
 Write the script in the style of an energetic local personality.
 Do not say your name or leave a placeholder for one.
 For each event, give the title, the start time, the location, who should attend, and the price (if known).

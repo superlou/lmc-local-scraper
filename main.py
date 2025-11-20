@@ -7,7 +7,6 @@ from datetime import datetime
 from glob import glob
 from pathlib import Path
 
-import pandas as pd
 import requests
 from devtools import debug
 from dotenv import load_dotenv
@@ -19,7 +18,7 @@ from pydantic import ValidationError
 
 from agents.film_agent import FilmAgent
 from agents.heygen_client import HeyGenClient
-from agents.script_writer_agent import ScriptResult, ScriptWriterAgent
+from agents.script_writer_agent import ScriptResult
 from agents.storyboard_agent import StoryboardAgent, StoryboardResult
 from producer import Producer
 
@@ -55,7 +54,7 @@ def main():
         producer.research_events(all_targets, args.filter)
 
     if args.write:
-        producer.write_script()
+        producer.write_script(3)
 
     # if args.storyboard:
     #     make_storyboard()

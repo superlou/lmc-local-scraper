@@ -67,12 +67,12 @@ class Producer:
         df.to_csv(events_path)
         logger.info(f"Collected {len(df)} events into {events_path}")
 
-    def write_script(self):
+    def write_script(self, num_events: int):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
         df = pd.read_csv(self.path / "events.csv")
         logger.info(f"Loaded {len(df)} events to write script.")
-        script_writer = ScriptWriterAgent(df)
+        script_writer = ScriptWriterAgent(df, num_events)
         script = script_writer.run(llm)
 
         script_path = self.path / "script.json"

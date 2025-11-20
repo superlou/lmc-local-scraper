@@ -217,3 +217,9 @@ FileNotFoundError: [Errno 2] No such file or directory: 'gen/2025-11-19/events_v
 2025-11-19 20:09:01.827 | INFO     | __main__:main:49 - Working in gen/2025-11-19
 2025-11-19 20:09:01.911 | INFO     | producer:write_script:74 - Loaded 108 events to write script.
 2025-11-19 20:09:07.738 | INFO     | producer:write_script:83 - Script written to gen/2025-11-19/script.json
+2025-11-19 20:12:30.621 | INFO     | __main__:main:49 - Working in gen/2025-11-19
+2025-11-19 20:12:30.705 | INFO     | producer:write_script:74 - Loaded 108 events to write script.
+2025-11-19 20:12:34.776 | INFO     | producer:write_script:83 - Script written to gen/2025-11-19/script.json
+2025-11-19 20:14:26.506 | INFO     | __main__:main:48 - Working in gen/2025-11-19
+2025-11-19 20:14:26.594 | INFO     | producer:write_script:74 - Loaded 108 events to write script.
+2025-11-19 20:14:31.460 | INFO     | producer:write_script:83 - Script written to gen/2025-11-19/script.json

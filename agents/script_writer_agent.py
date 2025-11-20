@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pandas as pd
 from google import genai
 from pydantic import BaseModel
@@ -26,14 +28,16 @@ class ScriptResult(BaseModel):
 
 
 class ScriptWriterAgent:
-    def __init__(self, events: pd.DataFrame):
+    def __init__(self, events: pd.DataFrame, num_events: int):
         self.events = events
+        self.num_events = num_events
 
     def run(self, llm: genai.Client) -> ScriptResult:
         prompt = build_prompt(
             "prompts/script_writer.txt",
-            date="9/20/25",
+            date=datetime.now().strftime("%Y-%m-%d"),
             csv=self.events.to_csv(),
+            num_events=self.num_events,
         )
 
         response = llm.models.generate_content(
