@@ -1,15 +1,23 @@
+import json
 import os
+import time
 from datetime import datetime
+from glob import glob
 from pathlib import Path
 
 import pandas as pd
+import requests
 from dateutil.relativedelta import relativedelta
 from fpdf import FPDF
 from google import genai
 from loguru import logger
+from moviepy import VideoFileClip, concatenate_videoclips
+from pydantic import ValidationError
 
 from agents.event_list_agent import EventListAgent, EventsResult
+from agents.film_agent import FilmAgent
 from agents.flat_event_page_agent import FlatEventPageAgent
+from agents.heygen_client import HeyGenClient
 from agents.script_writer_agent import ScriptResult, ScriptWriterAgent
 from agents.storyboard_agent import StoryboardAgent, StoryboardResult
 
@@ -109,6 +117,81 @@ class Producer:
 
         logger.info(f"Created storyboard PDF at {storyboard_path}")
 
+    def film_clips(self):
+        storyboard_path = self.path / "storyboard.json"
+
+        client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
+        quota_response = client.check_quota()
+        logger.info("Checked HeyGen quota", response=quota_response)
+
+        storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
+
+        # Submit jobs
+        for take in storyboard.takes:
+            agent = FilmAgent(os.environ["HEYGEN_API_KEY"], take.text, take.frame)
+            # video_id = agent.run()
+            video_id = "fake12345"
+
+            clip_job = {
+                "clip": take.id,
+                "processor": "HeyGen Avatar V2",
+                "video_id": video_id,
+                "done": False,
+                "text": take.text,
+                "frame": take.frame,
+            }
+            clip_job_path = self.path / f"clip_{take.id}.txt"
+            json.dump(clip_job, open(clip_job_path, "w"), indent=4)
+
+            logger.info(f"Started clip job {video_id} with info in {clip_job_path}")
+
+        # Wait for jobs and download them
+        wait_for_jobs = True
+
+        while wait_for_jobs:
+            wait_for_jobs = False
+            clip_job_paths = sorted(self.path.glob("clip_*.txt"))
+
+            for clip_job_path in clip_job_paths:
+                clip_job = json.load(open(clip_job_path))
+                clip_path = self.path / f"clip_{clip_job['clip']}.mp4"
+                video_id = clip_job["video_id"]
+
+                if clip_job["done"] and Path(clip_path).exists():
+                    continue
+
+                try:
+                    response = client.get_video_status(video_id)
+                    status = response.data["status"]
+                    video_url = response.data["video_url"]
+                    logger.info(f"Clip {clip_job['clip']}: {status}, {video_url}")
+                    if status == "completed":
+                        clip_job["done"] = True
+                        logger.info(f"Clip job {clip_job['clip']} finished")
+                        json.dump(clip_job, open(clip_job_path, "w"), indent=4)
+
+                        logger.info(f"Downloading clip {clip_job['clip']}")
+                        download_file(video_url, clip_path)
+                    else:
+                        wait_for_jobs = True
+                except ValidationError:
+                    pass
+
+            if wait_for_jobs:
+                time.sleep(10)
+
+    def produce_video(self):
+        clip_files = sorted(self.path.glob("clip_*.mp4"))
+        logger.info(f"Found {len(clip_files)} clips")
+
+        clips = [VideoFileClip(clip_file) for clip_file in clip_files]
+        video = concatenate_videoclips(clips)
+
+        output_path = self.path / "video.mp4"
+        logger.info(f"Writing video to {output_path}...")
+        video.write_videofile(output_path)
+        logger.info(f"Wrote video to {output_path}")
+
 
 def storyboard_to_pdf(storyboard: StoryboardResult, output: Path):
     pdf = FPDF()
@@ -138,3 +221,15 @@ def result_to_df(result: EventsResult) -> pd.DataFrame:
             for event in result.events
         ]
     )
+
+
+def download_file(url: str, filename: str | Path):
+    try:
+        response = requests.get(url, stream=True)
+        with open(filename, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error downloading file from {url} to {filename}")
+    except IOError as e:
+        logger.error(f"Error saving file from {url} to {filename}")

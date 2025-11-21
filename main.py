@@ -1,21 +1,11 @@
 import argparse
-import json
-import os
-import time
 import tomllib
 from datetime import datetime
-from glob import glob
 from pathlib import Path
 
-import requests
 from dotenv import load_dotenv
 from loguru import logger
-from moviepy import VideoFileClip, concatenate_videoclips
-from pydantic import ValidationError
 
-from agents.film_agent import FilmAgent
-from agents.heygen_client import HeyGenClient
-from agents.storyboard_agent import StoryboardResult
 from producer import Producer
 
 load_dotenv()
@@ -55,96 +45,11 @@ def main():
     if args.storyboard:
         producer.make_storyboard()
 
-    # if args.film:
-    #     film_clips()
+    if args.film:
+        producer.film_clips()
 
-    # if args.produce:
-    #     produce_video()
-
-
-def film_clips():
-    client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
-    quota_response = client.check_quota()
-    logger.info("Checked HeyGen quota", response=quota_response)
-
-    storyboard = StoryboardResult.model_validate_json(
-        open("gen/storyboard.json").read()
-    )
-
-    for take in storyboard.takes:
-        agent = FilmAgent(
-            os.environ["HEYGEN_API_KEY"],
-            take.text,
-            take.frame,
-            "gen/intro.mp4",
-        )
-        video_id = agent.run()
-
-        video_process = {
-            "clip": take.id,
-            "processor": "HeyGen Avatar V2",
-            "video_id": video_id,
-        }
-        json.dump(video_process, open(f"gen/clip_{take.id}.txt", "w"), indent=4)
-
-    wait_for_generation = True
-
-    # todo Get smarter about checking videos that already completed.
-    # Download them as soon as they're ready.
-    while wait_for_generation:
-        time.sleep(10)
-        wait_for_generation = False
-
-        clip_files = sorted(glob("gen/clip_*.txt"))
-
-        for video_process_file in clip_files:
-            video_process = json.load(open(video_process_file))
-            video_id = video_process["video_id"]
-
-            try:
-                response = client.get_video_status(video_id)
-                # response = VideoStatusResponse(code=100, data={"status": "completed"})
-                status = response.data["status"]
-                video_url = response.data["video_url"]
-                print(f"Clip {video_process['clip']}: {status}, {video_url}")
-                if status != "completed":
-                    wait_for_generation = True
-            except ValidationError:
-                pass
-
-        print()
-
-    # Download all video clips
-    clip_files = sorted(glob("gen/clip_*.txt"))
-
-    for video_process_file in clip_files:
-        video_process = json.load(open(video_process_file))
-        video_id = video_process["video_id"]
-        clip = video_process["clip"]
-
-        response = client.get_video_status(video_id)
-        status = response.data["status"]
-        video_url = response.data["video_url"]
-
-        try:
-            print(f"Downloading clip {clip}...")
-            response = requests.get(video_url, stream=True)
-            with open(f"gen/clip_{clip}.mp4", "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-        except requests.exceptions.RequestException as e:
-            print("Error downloading file.")
-        except IOError as e:
-            print("Error saving file.")
-
-
-def produce_video():
-    clip_files = sorted(glob("gen/clip_*.mp4"))
-    clips = [VideoFileClip(clip_file) for clip_file in clip_files]
-    video = concatenate_videoclips(clips)
-    print("Writing final video...")
-    video.write_videofile("gen/video.mp4")
-    print("done.")
+    if args.produce:
+        producer.produce_video()
 
 
 if __name__ == "__main__":

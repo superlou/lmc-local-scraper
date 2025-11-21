@@ -17,11 +17,10 @@ from .heygen_client import (
 
 
 class FilmAgent:
-    def __init__(self, api_key, dialogue: str, background_path: str, output_path: str):
+    def __init__(self, api_key, dialogue: str, background_path: str):
         self.client = HeyGenClient(api_key)
         self.dialogue = dialogue
         self.background_path = background_path
-        self.output_path = output_path
 
     def run(self) -> str | None:
         asset_name = Path(self.background_path).name
