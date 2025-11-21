@@ -13,6 +13,7 @@ from google import genai
 from loguru import logger
 from moviepy import VideoFileClip, concatenate_videoclips
 from pydantic import ValidationError
+from requests.exceptions import JSONDecodeError
 
 from agents.event_list_agent import EventListAgent, EventsResult
 from agents.film_agent import FilmAgent
@@ -117,7 +118,7 @@ class Producer:
 
         logger.info(f"Created storyboard PDF at {storyboard_path}")
 
-    def film_clips(self):
+    def start_clip_jobs(self):
         storyboard_path = self.path / "storyboard.json"
 
         client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
@@ -126,11 +127,9 @@ class Producer:
 
         storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
 
-        # Submit jobs
         for take in storyboard.takes:
             agent = FilmAgent(os.environ["HEYGEN_API_KEY"], take.text, take.frame)
-            # video_id = agent.run()
-            video_id = "fake12345"
+            video_id = agent.run()
 
             clip_job = {
                 "clip": take.id,
@@ -139,13 +138,15 @@ class Producer:
                 "done": False,
                 "text": take.text,
                 "frame": take.frame,
+                "url": "",
             }
             clip_job_path = self.path / f"clip_{take.id}.txt"
             json.dump(clip_job, open(clip_job_path, "w"), indent=4)
 
             logger.info(f"Started clip job {video_id} with info in {clip_job_path}")
 
-        # Wait for jobs and download them
+    def wait_and_download_clip_jobs(self):
+        client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
         wait_for_jobs = True
 
         while wait_for_jobs:
@@ -162,15 +163,19 @@ class Producer:
 
                 try:
                     response = client.get_video_status(video_id)
+
                     status = response.data["status"]
                     video_url = response.data["video_url"]
-                    logger.info(f"Clip {clip_job['clip']}: {status}, {video_url}")
+                    logger.info(f"Clip {clip_job['clip']}: {status}")
                     if status == "completed":
                         clip_job["done"] = True
+                        clip_job["url"] = video_url
                         logger.info(f"Clip job {clip_job['clip']} finished")
                         json.dump(clip_job, open(clip_job_path, "w"), indent=4)
 
-                        logger.info(f"Downloading clip {clip_job['clip']}")
+                        logger.info(
+                            f"Downloading clip {clip_job['clip']} from {video_url} to {clip_path}"
+                        )
                         download_file(video_url, clip_path)
                     else:
                         wait_for_jobs = True
@@ -179,6 +184,10 @@ class Producer:
 
             if wait_for_jobs:
                 time.sleep(10)
+
+    def film_clips(self):
+        self.start_clip_jobs()
+        self.wait_and_download_clip_jobs()
 
     def produce_video(self):
         clip_files = sorted(self.path.glob("clip_*.mp4"))

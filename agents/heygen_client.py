@@ -203,12 +203,18 @@ class HeyGenClient:
     def upload_asset(self, asset_path: str, name: str):
         ext = Path(asset_path).suffix[1:]
 
+        content_type = {
+            "png": "image/png",
+            "jpg": "image/jpeg",
+            "jpeg": "image/jpeg",
+        }[ext]
+
         with open(asset_path, "rb") as image_file:
             response = requests.post(
                 "https://upload.heygen.com/v1/asset",
                 data=image_file,
                 params={"name": name},
-                headers={"Content-Type": f"image/{ext}"} | self.headers,
+                headers={"Content-Type": content_type} | self.headers,
             )
 
             return response.json()
