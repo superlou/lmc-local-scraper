@@ -13,7 +13,7 @@ dependencies = [
     "loguru>=0.7.3",
     "lxml>=5.3.1",
     "markdownify>=1.2.0",
-    "moviepy>=2.2.1",
+    "moviepy@git+https://github.com/Zulko/moviepy",
     "nicegui>=2.24.2",
     "ollama>=0.4.7",
     "openai>=2.6.1",

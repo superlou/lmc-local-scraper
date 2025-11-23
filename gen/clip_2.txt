@@ -1,5 +1,0 @@
-{
-    "clip": 2,
-    "processor": "HeyGen Avatar V2",
-    "video_id": "e47e6c0415f24d3db27927e34a7288fe"
-}

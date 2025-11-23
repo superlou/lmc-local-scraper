@@ -11,7 +11,8 @@ from dateutil.relativedelta import relativedelta
 from fpdf import FPDF
 from google import genai
 from loguru import logger
-from moviepy import VideoFileClip, concatenate_videoclips
+from moviepy import CompositeVideoClip, VideoFileClip, concatenate_videoclips
+from moviepy.video.VideoClip import TextClip
 from pydantic import ValidationError
 from requests.exceptions import JSONDecodeError
 
@@ -193,8 +194,22 @@ class Producer:
         clip_files = sorted(self.path.glob("clip_*.mp4"))
         logger.info(f"Found {len(clip_files)} clips")
 
-        clips = [VideoFileClip(clip_file) for clip_file in clip_files]
-        video = concatenate_videoclips(clips)
+        intro = VideoFileClip(clip_files[0])
+        text = (
+            TextClip(
+                text="11/21/25",
+                font="assets/NotoSans-Regular.ttf",
+                font_size=72,
+                color="white",
+            )
+            .with_duration(5)
+            .with_position("center")
+        )
+        intro = CompositeVideoClip([intro, text])
+
+        video = concatenate_videoclips(
+            [intro] + [VideoFileClip(clip_file) for clip_file in clip_files[1:]]
+        )
 
         output_path = self.path / "video.mp4"
         logger.info(f"Writing video to {output_path}...")
