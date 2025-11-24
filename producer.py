@@ -1,7 +1,7 @@
 import json
 import os
 import time
-from datetime import datetime
+from datetime import date, datetime
 from glob import glob
 from pathlib import Path
 
@@ -28,7 +28,7 @@ class Producer:
     def __init__(self, working_dir: Path):
         self.path = working_dir
 
-    def research_events(self, targets, filter: list[str]):
+    def research_events(self, targets, filter: list[str], today: date):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
         all_targets = targets
@@ -63,9 +63,8 @@ class Producer:
                 continue
 
             logger.info(f"Researching {target}")
-            now = datetime.now()
-            finish = now + relativedelta(months=1)
-            result = agent.run(llm, now, finish)
+            finish = today + relativedelta(months=1)
+            result = agent.run(llm, today, finish)
             df = result_to_df(result)
             df["organization"] = config["organization"]
             logger.info(f"Found {len(df)} events from {target}", tokens=agent.tokens)
@@ -78,12 +77,12 @@ class Producer:
         df.to_csv(events_path)
         logger.info(f"Collected {len(df)} events into {events_path}")
 
-    def write_script(self, num_events: int):
+    def write_script(self, today: date, num_events: int):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
         df = pd.read_csv(self.path / "events.csv")
         logger.info(f"Loaded {len(df)} events to write script.")
-        script_writer = ScriptWriterAgent(df, num_events)
+        script_writer = ScriptWriterAgent(df, today, num_events)
         script = script_writer.run(llm)
 
         script_path = self.path / "script.json"
@@ -190,14 +189,14 @@ class Producer:
         self.start_clip_jobs()
         self.wait_and_download_clip_jobs()
 
-    def produce_video(self):
+    def produce_video(self, today: date):
         clip_files = sorted(self.path.glob("clip_*.mp4"))
         logger.info(f"Found {len(clip_files)} clips")
 
         intro = VideoFileClip(clip_files[0])
         text = (
             TextClip(
-                text="11/21/25",
+                text=today.strftime("%m/%d/%y"),
                 font="assets/NotoSans-Regular.ttf",
                 font_size=72,
                 color="white",

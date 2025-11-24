@@ -1,17 +1,17 @@
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import date
 from urllib.parse import urlparse
 
-from google import genai
 import structlog
+from google import genai
 
+import simplify_url
 from agent_util import build_prompt
 from agents.gemini_event_research_agent import (
-    GeminiEventResearchAgent,
-    EventsResult,
     Event,
+    EventsResult,
+    GeminiEventResearchAgent,
 )
-import simplify_url
 
 logger = structlog.get_logger()
 
@@ -30,8 +30,8 @@ class EventListAgent(GeminiEventResearchAgent):
     def run(
         self,
         llm: genai.Client,
-        events_start: datetime,
-        events_finish: datetime,
+        events_start: date,
+        events_finish: date,
         event_pages_limit: int | None = None,
     ) -> EventsResult:
         url = self.start_url
@@ -47,7 +47,7 @@ class EventListAgent(GeminiEventResearchAgent):
                             {
                                 "events_start": events_start,
                                 "events_finish": events_finish,
-                            }
+                            },
                         )
                     )
                     for name, value in self.start_url_params.items()
@@ -59,9 +59,9 @@ class EventListAgent(GeminiEventResearchAgent):
         prompt = build_prompt(
             "prompts/event_list_start.txt",
             start_page=start_page,
-            year=events_start.strftime("%Y"),
-            start_date=events_start.strftime("%Y-%m-%d"),
-            finish_date=events_finish.strftime("%Y-%m-%d"),
+            year=events_start.year,
+            start_date=events_start.isoformat(),
+            finish_date=events_finish.isoformat(),
         )
         response = self.ask_gemini(llm, "gemini-2.5-flash-lite", prompt, EventsResult)
 

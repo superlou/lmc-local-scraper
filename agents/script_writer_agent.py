@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import pandas as pd
 from google import genai
@@ -28,14 +28,15 @@ class ScriptResult(BaseModel):
 
 
 class ScriptWriterAgent:
-    def __init__(self, events: pd.DataFrame, num_events: int):
+    def __init__(self, events: pd.DataFrame, today: date, num_events: int):
         self.events = events
         self.num_events = num_events
+        self.today = today
 
     def run(self, llm: genai.Client) -> ScriptResult:
         prompt = build_prompt(
             "prompts/script_writer.txt",
-            date=datetime.now().strftime("%Y-%m-%d"),
+            date=self.today.isoformat(),
             csv=self.events.to_csv(),
             num_events=self.num_events,
         )
