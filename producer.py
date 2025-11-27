@@ -194,17 +194,8 @@ class Producer:
         logger.info(f"Found {len(clip_files)} clips")
 
         intro = VideoFileClip(clip_files[0])
-        text = (
-            TextClip(
-                text=today.strftime("%m/%d/%y"),
-                font="assets/NotoSans-Regular.ttf",
-                font_size=72,
-                color="white",
-            )
-            .with_duration(5)
-            .with_position("center")
-        )
-        intro = CompositeVideoClip([intro, text])
+        title = VideoFileClip("titler/output.webm", has_mask=True)
+        intro = CompositeVideoClip([intro, title])
 
         video = concatenate_videoclips(
             [intro] + [VideoFileClip(clip_file) for clip_file in clip_files[1:]]
