@@ -1,7 +1,5 @@
 import subprocess
-import sys
 import threading
-import time
 from pathlib import Path
 
 from loguru import logger
@@ -22,10 +20,15 @@ class Titler:
         # todo Check for ffmpeg
         logger.warning("Environment check not implemented!")
 
+    def serve_blocking(self, port: int | None):
+        title_server = TitleServer(self.title_page.parent, port)
+        server_base = f"http://{title_server.host}:{title_server.port}"
+        logger.info(f"Starting title server at {server_base}")
+        title_server.serve_forever()
+
     def generate(self):
         title_server = TitleServer(self.title_page.parent)
-        server_base = f"http://{title_server.addr}:{title_server.port}"
-
+        server_base = f"http://{title_server.host}:{title_server.port}"
         logger.info(f"Starting title server at {server_base}")
         server_thread = threading.Thread(target=title_server.serve_forever, daemon=True)
         server_thread.start()
@@ -100,5 +103,18 @@ class Titler:
 
 
 if __name__ == "__main__":
-    titler = Titler("title/index.html", "frames")
-    titler.generate()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("title", help="HTML title")
+    parser.add_argument("-s", "--serve", action="store_true")
+    parser.add_argument("-p", "--port", type=int)
+    parser.add_argument("-g", "--generate", action="store_true")
+    args = parser.parse_args()
+
+    titler = Titler(args.title, "frames")
+
+    if args.serve:
+        titler.serve_blocking(args.port)
+    elif args.generate:
+        titler.generate()
