@@ -21,13 +21,13 @@ class Titler:
         logger.warning("Environment check not implemented!")
 
     def serve_blocking(self, port: int | None):
-        title_server = TitleServer(self.title_page.parent, port)
+        title_server = TitleServer(self.title_page, port)
         server_base = f"http://{title_server.host}:{title_server.port}"
         logger.info(f"Starting title server at {server_base}")
         title_server.serve_forever()
 
     def generate(self):
-        title_server = TitleServer(self.title_page.parent)
+        title_server = TitleServer(self.title_page)
         server_base = f"http://{title_server.host}:{title_server.port}"
         logger.info(f"Starting title server at {server_base}")
         server_thread = threading.Thread(target=title_server.serve_forever, daemon=True)
