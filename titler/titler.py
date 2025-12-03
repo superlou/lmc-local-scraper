@@ -25,7 +25,13 @@ class Titler:
         logger.info(f"Starting title server at {server_base}")
         title_server.serve_forever()
 
-    def generate(self, url: str, frames_dir: str | Path):
+    def generate(
+        self,
+        url: str,
+        duration: float,
+        frames_dir: str | Path,
+        frame_rate: float = 30.0,
+    ):
         self.frames_dir = Path(frames_dir)
         title_server = TitleServer(self.root)
         server_base = f"http://{title_server.host}:{title_server.port}"
@@ -42,9 +48,7 @@ class Titler:
         options.add_argument("disable-infobars")
         options.add_argument("--disable-extensions")
 
-        ANIM_DURATION = 5
-        FRAME_RATE = 30
-        FRAMES = ANIM_DURATION * FRAME_RATE
+        FRAMES = int(duration * frame_rate)
 
         driver = TitleGenChromeDriver(options=options)
         dx, dy = driver.get_window_outer_size()
@@ -64,7 +68,7 @@ class Titler:
 
         shots = []
         for frame in range(FRAMES):
-            delay = (frame / FRAMES) * -ANIM_DURATION
+            delay = (frame / FRAMES) * -duration
             logger.debug(f"{delay=}")
 
             for elem in animated:
@@ -88,7 +92,7 @@ class Titler:
                 "ffmpeg",
                 "-y",
                 "-framerate",
-                str(FRAME_RATE),
+                str(frame_rate),
                 "-i",
                 self.frames_dir / "%d.png",
                 "-c:v",
@@ -117,4 +121,4 @@ if __name__ == "__main__":
     if args.serve:
         titler.serve_blocking(args.port)
     elif args.generate_url:
-        titler.generate(args.generate_url, "frames")
+        titler.generate(args.generate_url, 5.0, "frames")
