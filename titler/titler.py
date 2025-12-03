@@ -10,9 +10,8 @@ from title_server import TitleServer
 
 
 class Titler:
-    def __init__(self, root: str | Path, frames_dir: str | Path):
+    def __init__(self, root: str | Path):
         self.root = Path(root)
-        self.frames_dir = Path(frames_dir)
         self.check_environment()
 
     def check_environment(self):
@@ -26,7 +25,8 @@ class Titler:
         logger.info(f"Starting title server at {server_base}")
         title_server.serve_forever()
 
-    def generate(self, url: str):
+    def generate(self, url: str, frames_dir: str | Path):
+        self.frames_dir = Path(frames_dir)
         title_server = TitleServer(self.root)
         server_base = f"http://{title_server.host}:{title_server.port}"
         logger.info(f"Starting title server at {server_base}")
@@ -90,7 +90,7 @@ class Titler:
                 "-framerate",
                 str(FRAME_RATE),
                 "-i",
-                "frames/%d.png",
+                self.frames_dir / "%d.png",
                 "-c:v",
                 "libvpx-vp9",
                 "-b:v",
@@ -112,9 +112,9 @@ if __name__ == "__main__":
     parser.add_argument("-g", "--generate_url")
     args = parser.parse_args()
 
-    titler = Titler(args.title, "frames")
+    titler = Titler(args.title)
 
     if args.serve:
         titler.serve_blocking(args.port)
     elif args.generate_url:
-        titler.generate(args.generate_url)
+        titler.generate(args.generate_url, "frames")
