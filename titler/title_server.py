@@ -7,13 +7,10 @@ from jinja2 import Template
 
 
 class TitleServer(server.HTTPServer):
-    def __init__(self, title_path: str | Path, port: int | None = None):
+    def __init__(self, root: str | Path, port: int | None = None):
         self.host = "localhost"
         self.port = port or self.find_free_port()
-        title_path = Path(title_path)
-        self.title_path = title_path
-        self.root = title_path.parent
-
+        self.root = Path(root)
         super().__init__((self.host, self.port), TitleServerRequestHandler)
 
     def find_free_port(self) -> int:
@@ -26,7 +23,7 @@ class TitleServerRequestHandler(server.BaseHTTPRequestHandler):
     def do_GET(self):
         root = self.server.root
         parsed_url = urllib.parse.urlparse(self.path)
-        query = urllib.parse.parse_qsl(parsed_url.query)
+        query = urllib.parse.parse_qs(parsed_url.query)
         file_path = root / parsed_url.path[1:]  # Remove leading "/"
 
         if file_path.exists():
@@ -37,7 +34,7 @@ class TitleServerRequestHandler(server.BaseHTTPRequestHandler):
         ).exists():
             template_contents = open(template_path).read()
             template = Template(template_contents)
-            file_contents = template.render(text="something").encode()
+            file_contents = template.render(**query).encode()
         else:
             self.send_error(404, f"Path not found: {self.path}")
             return
