@@ -51,10 +51,9 @@ class Titler:
         FRAMES = int(duration * frame_rate)
 
         driver = TitleGenChromeDriver(options=options)
-        dx, dy = driver.get_window_outer_size()
-        driver.set_window_size(1280 + dx, 720 + dy)
         driver.get(title_url)
         driver.make_background_transparent()
+        driver.resize_and_check(1280, 720)
 
         # 1. Find all elements with animations
         # todo Make this automatic rather than requiring a specific class.
@@ -110,13 +109,13 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("title", help="HTML title")
+    parser.add_argument("root", help="HTML root")
     parser.add_argument("-s", "--serve", action="store_true")
     parser.add_argument("-p", "--port", type=int)
     parser.add_argument("-g", "--generate_url")
     args = parser.parse_args()
 
-    titler = Titler(args.title)
+    titler = Titler(args.root)
 
     if args.serve:
         titler.serve_blocking(args.port)

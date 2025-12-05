@@ -1,10 +1,15 @@
-import json
+import io
 
+from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
+
+
+class ResizeFailure(Exception):
+    pass
 
 
 class TitleGenChromeDriver(webdriver.Chrome):
@@ -57,3 +62,17 @@ class TitleGenChromeDriver(webdriver.Chrome):
             "var w=window; return [w.outerWidth - w.innerWidth, w.outerHeight - w.innerHeight];"
         )
         return dx, dy
+
+    def resize_and_check(self, width, height):
+        self.set_window_size(width, height)
+        check_image = Image.open(io.BytesIO(self.get_screenshot_as_png()))
+        check_width, check_height = check_image.size
+        dx = width - check_width
+        dy = height - check_height
+
+        self.set_window_size(width + dx, height + dy)
+        check_image = Image.open(io.BytesIO(self.get_screenshot_as_png()))
+        check_width, check_height = check_image.size
+
+        if check_image.size != (width, height):
+            raise ResizeFailure("Failed")
