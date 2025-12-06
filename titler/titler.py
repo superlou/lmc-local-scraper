@@ -9,6 +9,10 @@ from title_gen_chrome_driver import TitleGenChromeDriver
 from title_server import TitleServer
 
 
+class OutputTypeNotWebm(Exception):
+    pass
+
+
 class Titler:
     def __init__(self, root: str | Path):
         self.root = Path(root)
@@ -30,8 +34,13 @@ class Titler:
         url: str,
         duration: float,
         frames_dir: str | Path,
+        output: str | Path,
         frame_rate: float = 30.0,
     ):
+        output = Path(output)
+        if output.suffix != ".webm":
+            raise OutputTypeNotWebm("Output file extension must be .webm")
+
         self.frames_dir = Path(frames_dir)
         title_server = TitleServer(self.root)
         server_base = f"http://{title_server.host}:{title_server.port}"
@@ -102,7 +111,7 @@ class Titler:
                 "4000k",
                 "-pix_fmt",
                 "yuva420p",
-                "output.webm",
+                output,
             ]
         )
 
