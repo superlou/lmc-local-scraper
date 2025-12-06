@@ -57,6 +57,12 @@ class TitleGenChromeDriver(webdriver.Chrome):
         )"""
         self.execute_script(script, element)
 
+    def pause_animation(self, element: WebElement):
+        self.execute_script(
+            "arguments[0].setAttribute('style', 'animation-play-state: paused;')",
+            element,
+        )
+
     def get_window_outer_size(self):
         dx, dy = self.execute_script(
             "var w=window; return [w.outerWidth - w.innerWidth, w.outerHeight - w.innerHeight];"

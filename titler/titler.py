@@ -51,9 +51,9 @@ class Titler:
         FRAMES = int(duration * frame_rate)
 
         driver = TitleGenChromeDriver(options=options)
-        driver.get(title_url)
         driver.make_background_transparent()
         driver.resize_and_check(1280, 720)
+        driver.get(title_url)
 
         # 1. Find all elements with animations
         # todo Make this automatic rather than requiring a specific class.
@@ -68,11 +68,13 @@ class Titler:
         shots = []
         for frame in range(FRAMES):
             delay = (frame / FRAMES) * -duration
-            logger.debug(f"{delay=}")
 
+            # todo Get to this ASAP because for some reason, the animation starts
+            # playing regardless of the paused state.
             for elem in animated:
                 driver.seek_animation_delay(elem, animation_delays[elem], delay)
 
+            logger.debug(f"{delay=}")
             shots.append(driver.get_screenshot_as_png())
 
         logger.info("Finished capturing frames")
