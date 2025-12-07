@@ -124,6 +124,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--serve", action="store_true")
     parser.add_argument("-p", "--port", type=int)
     parser.add_argument("-g", "--generate_url")
+    parser.add_argument("-o", "--output", default="output.webm")
     args = parser.parse_args()
 
     titler = Titler(args.root)
@@ -131,4 +132,4 @@ if __name__ == "__main__":
     if args.serve:
         titler.serve_blocking(args.port)
     elif args.generate_url:
-        titler.generate(args.generate_url, 5.0, "frames")
+        titler.generate(args.generate_url, 5.0, "frames", args.output)
