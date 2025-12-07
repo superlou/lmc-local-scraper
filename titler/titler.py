@@ -5,8 +5,9 @@ from pathlib import Path
 from loguru import logger
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from title_gen_chrome_driver import TitleGenChromeDriver
-from title_server import TitleServer
+
+from .title_gen_chrome_driver import TitleGenChromeDriver
+from .title_server import TitleServer
 
 
 class OutputTypeNotWebm(Exception):
@@ -60,9 +61,9 @@ class Titler:
         FRAMES = int(duration * frame_rate)
 
         driver = TitleGenChromeDriver(options=options)
-        driver.make_background_transparent()
         driver.resize_and_check(1280, 720)
         driver.get(title_url)
+        driver.make_background_transparent()
 
         # 1. Find all elements with animations
         # todo Make this automatic rather than requiring a specific class.

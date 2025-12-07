@@ -22,6 +22,7 @@ from agents.flat_event_page_agent import FlatEventPageAgent
 from agents.heygen_client import HeyGenClient
 from agents.script_writer_agent import ScriptResult, ScriptWriterAgent
 from agents.storyboard_agent import StoryboardAgent, StoryboardResult
+from titler.titler import Titler
 
 
 class Producer:
@@ -190,11 +191,19 @@ class Producer:
         self.wait_and_download_clip_jobs()
 
     def produce_video(self, today: date):
+        titler = Titler("assets/titles")
+        titler.generate(
+            f"tag_bottom_left.html?text={today.strftime('%m/%d/%Y')}",
+            5,
+            self.path / "frames",
+            self.path / "title_intro.webm",
+        )
+
         clip_files = sorted(self.path.glob("clip_*.mp4"))
         logger.info(f"Found {len(clip_files)} clips")
 
         intro = VideoFileClip(clip_files[0])
-        title = VideoFileClip("titler/output.webm", has_mask=True)
+        title = VideoFileClip(self.path / "title_intro.webm", has_mask=True)
         intro = CompositeVideoClip([intro, title])
 
         video = concatenate_videoclips(
