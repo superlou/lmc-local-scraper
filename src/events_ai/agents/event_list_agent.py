@@ -5,9 +5,9 @@ from urllib.parse import urlparse
 import structlog
 from google import genai
 
-import simplify_url
-from agent_util import build_prompt
-from agents.gemini_event_research_agent import (
+from .. import simplify_url
+from .agent_util import build_prompt
+from .gemini_event_research_agent import (
     Event,
     EventsResult,
     GeminiEventResearchAgent,
@@ -57,7 +57,7 @@ class EventListAgent(GeminiEventResearchAgent):
         start_page = simplify_url.get(url, use_selenium=self.use_selenium)
 
         prompt = build_prompt(
-            "prompts/event_list_start.txt",
+            "event_list_start.txt",
             start_page=start_page,
             year=events_start.year,
             start_date=events_start.isoformat(),
@@ -92,7 +92,7 @@ class EventListAgent(GeminiEventResearchAgent):
 
         page = simplify_url.get(event.link, self.use_selenium)
         prompt = build_prompt(
-            "prompts/event_list_update.txt",
+            "event_list_update.txt",
             event=event.model_dump_json(),
             page=page,
         )

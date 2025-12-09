@@ -4,9 +4,9 @@ from urllib.parse import urlparse
 import structlog
 from google import genai
 
-import simplify_url
-from agent_util import build_prompt
-from agents.gemini_event_research_agent import EventsResult, GeminiEventResearchAgent
+from .. import simplify_url
+from .agent_util import build_prompt
+from .gemini_event_research_agent import EventsResult, GeminiEventResearchAgent
 
 logger = structlog.get_logger()
 
@@ -24,7 +24,7 @@ class FlatEventPageAgent(GeminiEventResearchAgent):
     ) -> EventsResult:
         page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
         prompt = build_prompt(
-            "prompts/flat_events.txt",
+            "flat_events.txt",
             page=page,
             link=self.start_url,
             year=events_start.year,

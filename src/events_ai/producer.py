@@ -1,3 +1,4 @@
+import importlib.resources
 import json
 import os
 import time
@@ -10,19 +11,21 @@ import requests
 from dateutil.relativedelta import relativedelta
 from fpdf import FPDF
 from google import genai
+from htmlcorder.titler import Titler
 from loguru import logger
 from moviepy import CompositeVideoClip, VideoFileClip, concatenate_videoclips
 from moviepy.video.VideoClip import TextClip
 from pydantic import ValidationError
 from requests.exceptions import JSONDecodeError
 
-from agents.event_list_agent import EventListAgent, EventsResult
-from agents.film_agent import FilmAgent
-from agents.flat_event_page_agent import FlatEventPageAgent
-from agents.heygen_client import HeyGenClient
-from agents.script_writer_agent import ScriptResult, ScriptWriterAgent
-from agents.storyboard_agent import StoryboardAgent, StoryboardResult
-from titler.titler import Titler
+from .agents.event_list_agent import EventListAgent, EventsResult
+from .agents.film_agent import FilmAgent
+from .agents.flat_event_page_agent import FlatEventPageAgent
+from .agents.heygen_client import HeyGenClient
+from .agents.script_writer_agent import ScriptResult, ScriptWriterAgent
+from .agents.storyboard_agent import StoryboardAgent, StoryboardResult
+
+ASSETS_DIR = importlib.resources.files(__name__) / "assets"
 
 
 class Producer:
@@ -191,7 +194,7 @@ class Producer:
         self.wait_and_download_clip_jobs()
 
     def produce_video(self, today: date):
-        titler = Titler("assets/titles")
+        titler = Titler(ASSETS_DIR / "titles")
         titler.generate(
             f"tag_bottom_left.html?text={today.strftime('%m/%d/%Y')}",
             5,

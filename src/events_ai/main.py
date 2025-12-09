@@ -1,17 +1,19 @@
 import argparse
+import importlib.resources
 import tomllib
 from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
 from loguru import logger
-from producer import Producer
+
+from .producer import Producer
 
 load_dotenv()
 
 
 @logger.catch
-def main():
+def main_cli():
     logger.add("gen/log.txt")
 
     parser = argparse.ArgumentParser()
@@ -39,7 +41,8 @@ def main():
     producer = Producer(working_dir)
 
     if args.research:
-        all_targets = tomllib.load(open("research.toml", "rb"))
+        research_config = importlib.resources.files(__name__) / "research.toml"
+        all_targets = tomllib.load(open(research_config, "rb"))
         producer.research_events(all_targets, args.filter, today)
 
     if args.write:

@@ -4,7 +4,7 @@ import pandas as pd
 from google import genai
 from pydantic import BaseModel
 
-from agent_util import build_prompt
+from .agent_util import build_prompt
 
 
 class Opening(BaseModel):
@@ -35,7 +35,7 @@ class ScriptWriterAgent:
 
     def run(self, llm: genai.Client) -> ScriptResult:
         prompt = build_prompt(
-            "prompts/script_writer.txt",
+            "script_writer.txt",
             date=self.today.isoformat(),
             csv=self.events.to_csv(),
             num_events=self.num_events,
