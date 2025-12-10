@@ -10,6 +10,8 @@ Images must be generic and MUST NOT USE specific people, trademarks, or brands. 
 
 For each event, describe fun and appropriate background music.
 
+In the closing, briefly explain that you're an AI agent. Use a statement similar to, but not exactly the same as: "I'm an AI experiment developed by LMC Media to explore and connect our community. I research, write, and film all by myself, so please double-check my work. Thanks!"
+
 <<< START OF CSV EVENT DATA >>>
 
 {csv}
