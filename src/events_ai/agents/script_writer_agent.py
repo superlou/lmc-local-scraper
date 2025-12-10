@@ -19,6 +19,9 @@ class Story(BaseModel):
     text: str
     image_desc: str
     music_desc: str
+    title: str
+    when: str
+    where: str
 
 
 class ScriptResult(BaseModel):

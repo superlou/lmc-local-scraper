@@ -14,6 +14,9 @@ class Take(BaseModel):
     id: int
     text: str
     frame: str
+    title: str
+    when: str
+    where: str
 
 
 class StoryboardResult(BaseModel):
@@ -33,7 +36,14 @@ class StoryboardAgent:
         take_id = 0
 
         result.takes.append(
-            Take(id=take_id, text=self.script.opening, frame=self.base_image_path)
+            Take(
+                id=take_id,
+                text=self.script.opening,
+                frame=self.base_image_path,
+                title="Opening",
+                when="",
+                where="",
+            )
         )
 
         for i, story in enumerate(self.script.stories):
@@ -43,11 +53,27 @@ class StoryboardAgent:
             )
             self.generate_frame(llm, story.image_desc, frame_path)
             take_id += 1
-            result.takes.append(Take(id=take_id, text=story.text, frame=frame_path))
+            result.takes.append(
+                Take(
+                    id=take_id,
+                    text=story.text,
+                    frame=frame_path,
+                    title=story.title,
+                    when=story.when,
+                    where=story.where,
+                )
+            )
 
         take_id += 1
         result.takes.append(
-            Take(id=take_id, text=self.script.closing, frame=self.base_image_path)
+            Take(
+                id=take_id,
+                text=self.script.closing,
+                frame=self.base_image_path,
+                title="Closing",
+                when="",
+                where="",
+            )
         )
         return result
 

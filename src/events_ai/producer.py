@@ -103,7 +103,9 @@ class Producer:
         script = ScriptResult.model_validate_json(open(script_path).read())
         logger.info(f"Loaded script from {script_path}")
 
-        storyboard = StoryboardAgent(script, "assets/studio_background.png", self.path)
+        storyboard = StoryboardAgent(
+            script, str(ASSETS_DIR / "studio_background.png"), self.path
+        )
         result = storyboard.run(llm)
 
         storyboard_path = self.path / "storyboard.json"
@@ -222,7 +224,7 @@ class Producer:
 def storyboard_to_pdf(storyboard: StoryboardResult, output: Path):
     pdf = FPDF()
     pdf.add_page()
-    pdf.add_font("NotoSans", "", "assets/NotoSans-Regular.ttf")
+    pdf.add_font("NotoSans", "", ASSETS_DIR / "NotoSans-Regular.ttf")
     pdf.set_font("NotoSans", size=12)
 
     for take in storyboard.takes:
