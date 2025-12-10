@@ -14,8 +14,6 @@ load_dotenv()
 
 @logger.catch
 def main_cli():
-    logger.add("gen/log.txt")
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--research", action="store_true")
     parser.add_argument("-w", "--write", action="store_true")
