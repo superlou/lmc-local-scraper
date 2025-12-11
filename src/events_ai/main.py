@@ -15,14 +15,13 @@ load_dotenv()
 @logger.catch
 def main_cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-r", "--research", action="store_true")
+    parser.add_argument("-r", "--research", nargs="*")
     parser.add_argument("-w", "--write", action="store_true")
     parser.add_argument("-s", "--storyboard", action="store_true")
     parser.add_argument("-f", "--film", nargs="*", type=int)
     parser.add_argument("-p", "--produce", action="store_true")
     parser.add_argument("--working-dir")
     parser.add_argument("--today")
-    parser.add_argument("--filter", nargs="+")
 
     args = parser.parse_args()
 
@@ -38,10 +37,12 @@ def main_cli():
 
     producer = Producer(working_dir)
 
-    if args.research:
+    if args.research is not None:
         research_config = importlib.resources.files(__name__) / "research.toml"
         all_targets = tomllib.load(open(research_config, "rb"))
-        producer.research_events(all_targets, args.filter, today)
+        producer.research_events(
+            all_targets, today, args.research if len(args.research) > 0 else None
+        )
 
     if args.write:
         producer.write_script(today, 3)

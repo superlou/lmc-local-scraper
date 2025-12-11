@@ -32,13 +32,13 @@ class Producer:
     def __init__(self, working_dir: Path):
         self.path = working_dir
 
-    def research_events(self, targets, filter: list[str], today: date):
+    def research_events(self, targets, today: date, filter: list[str] | None = None):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
         all_targets = targets
         logger.info(f"Found {len(all_targets)} research targets")
 
-        if filter and len(filter) > 0:
+        if filter is not None and len(filter) > 0:
             targets = {
                 target: config
                 for target, config in all_targets.items()
