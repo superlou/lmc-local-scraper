@@ -18,7 +18,7 @@ def main_cli():
     parser.add_argument("-r", "--research", action="store_true")
     parser.add_argument("-w", "--write", action="store_true")
     parser.add_argument("-s", "--storyboard", action="store_true")
-    parser.add_argument("-f", "--film", action="store_true")
+    parser.add_argument("-f", "--film", nargs="*", type=int)
     parser.add_argument("-p", "--produce", action="store_true")
     parser.add_argument("--working-dir")
     parser.add_argument("--today")
@@ -49,8 +49,8 @@ def main_cli():
     if args.storyboard:
         producer.make_storyboard()
 
-    if args.film:
-        producer.film_clips()
+    if args.film is not None:
+        producer.film_clips(takes_filter=args.film if len(args.film) > 0 else None)
 
     if args.produce:
         producer.produce_video(today)

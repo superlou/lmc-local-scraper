@@ -23,7 +23,7 @@ from .agents.film_agent import FilmAgent
 from .agents.flat_event_page_agent import FlatEventPageAgent
 from .agents.heygen_client import HeyGenClient
 from .agents.script_writer_agent import ScriptResult, ScriptWriterAgent
-from .agents.storyboard_agent import StoryboardAgent, StoryboardResult
+from .agents.storyboard_agent import StoryboardAgent, StoryboardResult, Take
 
 ASSETS_DIR = importlib.resources.files(__name__) / "assets"
 
@@ -124,16 +124,12 @@ class Producer:
 
         logger.info(f"Created storyboard PDF at {storyboard_path}")
 
-    def start_clip_jobs(self):
-        storyboard_path = self.path / "storyboard.json"
-
+    def start_clip_jobs(self, takes: list[Take]):
         client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
         quota_response = client.check_quota()
         logger.info("Checked HeyGen quota", response=quota_response)
 
-        storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
-
-        for take in storyboard.takes:
+        for take in takes:
             agent = FilmAgent(os.environ["HEYGEN_API_KEY"], take.text, take.frame)
             video_id = agent.run()
 
@@ -191,8 +187,15 @@ class Producer:
             if wait_for_jobs:
                 time.sleep(10)
 
-    def film_clips(self):
-        self.start_clip_jobs()
+    def film_clips(self, takes_filter: list[int] | None = None):
+        storyboard_path = self.path / "storyboard.json"
+        storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
+        takes = [
+            take
+            for take in storyboard.takes
+            if takes_filter is None or take.id in takes_filter
+        ]
+        self.start_clip_jobs(takes)
         self.wait_and_download_clip_jobs()
 
     def produce_video(self, today: date):
