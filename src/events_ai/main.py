@@ -16,7 +16,7 @@ load_dotenv()
 def main_cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("-r", "--research", nargs="*")
-    parser.add_argument("-w", "--write", action="store_true")
+    parser.add_argument("-w", "--write", nargs="*")
     parser.add_argument("-s", "--storyboard", action="store_true")
     parser.add_argument("-f", "--film", nargs="*", type=int)
     parser.add_argument("-p", "--produce", action="store_true")
@@ -44,8 +44,13 @@ def main_cli():
             all_targets, today, args.research if len(args.research) > 0 else None
         )
 
-    if args.write:
-        producer.write_script(today, 3)
+    if args.write is not None:
+        try:
+            num_events = int(args.write[0])
+        except Exception:
+            num_events = 4
+
+        producer.write_script(today, num_events)
 
     if args.storyboard:
         producer.make_storyboard()
