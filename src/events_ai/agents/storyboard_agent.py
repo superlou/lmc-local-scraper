@@ -24,11 +24,18 @@ class StoryboardResult(BaseModel):
 
 
 class StoryboardAgent:
-    def __init__(self, script: ScriptResult, base_image_path: str, gen_dir: Path):
+    def __init__(
+        self,
+        script: ScriptResult,
+        base_image_path: str,
+        gen_dir: Path,
+        aspect_ratio: str,
+    ):
         self.script = script
         self.base_image_path = base_image_path
         self.base_image = Image.open(base_image_path)
         self.gen_dir = gen_dir
+        self.aspect_ratio = aspect_ratio
 
     def run(self, llm: genai.Client) -> StoryboardResult:
         result = StoryboardResult(takes=[])
@@ -84,7 +91,7 @@ class StoryboardAgent:
             contents=prompt,
             config=genai.types.GenerateContentConfig(
                 response_modalities=["Image"],
-                image_config=genai.types.ImageConfig(aspect_ratio="16:9"),
+                image_config=genai.types.ImageConfig(aspect_ratio=self.aspect_ratio),
             ),
         )
 
@@ -103,7 +110,7 @@ class StoryboardAgent:
             contents=[prompt, self.base_image],
             config=genai.types.GenerateContentConfig(
                 response_modalities=["Image"],
-                image_config=genai.types.ImageConfig(aspect_ratio="16:9"),
+                image_config=genai.types.ImageConfig(aspect_ratio=self.aspect_ratio),
             ),
         )
 

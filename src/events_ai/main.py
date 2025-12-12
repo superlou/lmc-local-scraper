@@ -35,7 +35,7 @@ def main_cli():
     logger.info(f"Today is {today.strftime('%Y-%m-%d')}")
     logger.info(f"Working in {working_dir}")
 
-    producer = Producer(working_dir)
+    producer = Producer(working_dir, (720, 1280))
 
     if args.research is not None:
         research_config = importlib.resources.files(__name__) / "research.toml"
