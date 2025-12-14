@@ -28,6 +28,7 @@ dependencies = [
 
 [project.scripts]
 main = "events_ai:main_cli"
+heygen = "events_ai.agents.heygen_client:heygen_cli"
 
 [build-system]
 requires = ["uv_build>=0.9.16,<0.10.0"]

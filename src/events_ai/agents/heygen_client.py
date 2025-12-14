@@ -29,9 +29,18 @@ class ListAvatarsData(BaseModel):
     talking_photos: list[TalkingPhoto]
 
 
+class ListAvatarsInGroupData(BaseModel):
+    avatar_list: list[Avatar]
+
+
 class HeyGenListAvatarsResponse(BaseModel):
     error: str | None
     data: ListAvatarsData
+
+
+class HeyGenListAvatarsInGroupResponse(BaseModel):
+    error: str | None
+    data: ListAvatarsInGroupData
 
 
 class CharacterType(Enum):
@@ -60,15 +69,21 @@ class Expression(Enum):
     HAPPY = "happy"
 
 
+class Offset(BaseModel):
+    x: float = 0.0
+    y: float = 0.0
+
+
 class Character(BaseModel):
     type: CharacterType
     avatar_id: str | None = None
     # talking_photo_id: str | None = None
-    scale: float = 1
     avatar_style: AvatarStyle | None = None
     # talking_photo_style: TalkingPhotoStyle | None = None
     talking_style: TalkingStyle = TalkingStyle.STABLE
     expression: Expression = Expression.DEFAULT
+    scale: float = 1
+    offset: Offset | None = None
 
 
 class VoiceType(Enum):
@@ -93,6 +108,15 @@ class Voice(BaseModel):
     pitch: float = 0.0
     emotion: VoiceEmotion = VoiceEmotion.EXCITED
     locale: str | None = None
+
+
+class HeyGenListVoicesData(BaseModel):
+    voices: list[Any]
+
+
+class HeyGenListVoicesResponse(BaseModel):
+    error: Any | None
+    data: HeyGenListVoicesData
 
 
 class BackgroundType(Enum):
@@ -178,6 +202,22 @@ class HeyGenClient:
         )
         return HeyGenListAvatarsResponse.model_validate(response.json())
 
+    def list_avatars_in_group(
+        self, group_id: int | None = None
+    ) -> HeyGenListAvatarsInGroupResponse:
+        response = requests.get(
+            f"https://api.heygen.com/v2/avatar_group/{group_id}/avatars",
+            headers=self.headers,
+        )
+        return HeyGenListAvatarsInGroupResponse.model_validate(response.json())
+
+    def list_voices(self) -> HeyGenListVoicesResponse:
+        response = requests.get(
+            "https://api.heygen.com/v2/voices",
+            headers=self.headers,
+        )
+        return HeyGenListVoicesResponse.model_validate(response.json())
+
     def create_avatar_video_v2(
         self, request_data: CreateAvatarVideoV2Request
     ) -> CreateAvatarVideoV2Response:
@@ -251,3 +291,54 @@ class HeyGenClient:
             headers=self.headers | {"content-type": "application/json"},
         )
         return response
+
+
+def heygen_cli():
+    import argparse
+    import os
+
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--quota", action="store_true")
+    parser.add_argument("--list-avatars", action="store_true")
+    parser.add_argument("--list-avatars-in-group")
+    parser.add_argument("--list-voices", action="store_true")
+    args = parser.parse_args()
+
+    client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
+
+    if args.quota:
+        print(client.check_quota())
+
+    if args.list_avatars:
+        print(client.list_avatars())
+
+    if args.list_avatars_in_group:
+        data = client.list_avatars_in_group(args.list_avatars_in_group).data
+        for avatar in data.avatar_list:
+            print(f"[{avatar.avatar_id}]")
+            print(
+                f"name: {avatar.avatar_name}, gender: {avatar.gender}, type: {avatar.type}, premium: {avatar.premium}"
+            )
+            print(f"default voice: {avatar.default_voice_id}")
+            print(f"preview image: {avatar.preview_image_url}")
+            print(f"preview video: {avatar.preview_video_url}")
+            print(f"tags: {', '.join(avatar.tags or [])}")
+            print()
+
+    if args.list_voices:
+        data = client.list_voices().data
+        voices = sorted(data.voices, key=lambda x: x["name"].strip())
+
+        for voice in voices:
+            name = voice["name"]
+            id = voice["voice_id"]
+            language = voice["language"]
+            emotion_support = voice["emotion_support"]
+            preview = voice["preview_audio"]
+            print(
+                f"* {name.strip()} ({id}) - {language}, emotion support: {emotion_support}, {preview}"
+            )
