@@ -115,7 +115,7 @@ class Producer:
 
         storyboard = StoryboardAgent(
             script,
-            str(ASSETS_DIR / "studio_background.png"),
+            str(ASSETS_DIR / "bookend_backdrop.png"),
             self.path,
             gen_aspect_ratio,
         )
