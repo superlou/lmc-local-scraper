@@ -9,6 +9,7 @@ from .heygen_client import (
     CreateAvatarVideoV2Request,
     Dimension,
     HeyGenClient,
+    Offset,
     Scene,
     TalkingStyle,
     Voice,
@@ -33,13 +34,15 @@ class FilmAgent:
         scene = Scene(
             character=Character(
                 type=CharacterType.avatar,
-                avatar_id="Abigail_expressive_2024112501",
+                avatar_id="Georgia_expressive_2024112701",
                 avatar_style=AvatarStyle.NORMAL,
                 talking_style=TalkingStyle.EXPRESSIVE,
+                offset=Offset(x=0.0, y=0.09),
+                scale=1.71,
             ),
             voice=Voice(
                 type=VoiceType.TEXT,
-                voice_id="330290724a1b470fb63153f34d4c0183",
+                voice_id="511ffd086a904ef593b608032004112c",
                 input_text=self.dialogue,
             ),
             background=Background(
@@ -48,7 +51,7 @@ class FilmAgent:
         )
         request_data = CreateAvatarVideoV2Request(
             title="Test Video",
-            dimension=Dimension(width=1280, height=720),
+            dimension=Dimension(width=720, height=1280),
             video_inputs=[scene],
         )
         response = self.client.create_avatar_video_v2(request_data)

@@ -29,8 +29,9 @@ ASSETS_DIR = importlib.resources.files(__name__) / "assets"
 
 
 class Producer:
-    def __init__(self, working_dir: Path):
+    def __init__(self, working_dir: Path, dimensions: tuple[float, float]):
         self.path = working_dir
+        self.dimensions = dimensions
 
     def research_events(self, targets, today: date, filter: list[str] | None = None):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
@@ -103,8 +104,20 @@ class Producer:
         script = ScriptResult.model_validate_json(open(script_path).read())
         logger.info(f"Loaded script from {script_path}")
 
+        aspect_ratio = self.dimensions[0] / self.dimensions[1]
+
+        if abs(percent_error(aspect_ratio, 16 / 9)) < 2.0:
+            gen_aspect_ratio = "16:9"
+        elif abs(percent_error(aspect_ratio, 9 / 16)) < 2.0:
+            gen_aspect_ratio = "9:16"
+        else:
+            raise ProducerDimensionsInvalid("Could not generate storyboard")
+
         storyboard = StoryboardAgent(
-            script, str(ASSETS_DIR / "studio_background.png"), self.path
+            script,
+            str(ASSETS_DIR / "bookend_backdrop.png"),
+            self.path,
+            gen_aspect_ratio,
         )
         result = storyboard.run(llm)
 
@@ -224,6 +237,10 @@ class Producer:
         logger.info(f"Wrote video to {output_path}")
 
 
+class ProducerDimensionsInvalid(Exception):
+    pass
+
+
 def storyboard_to_pdf(storyboard: StoryboardResult, output: Path):
     pdf = FPDF()
     pdf.add_page()
@@ -264,3 +281,7 @@ def download_file(url: str, filename: str | Path):
         logger.error(f"Error downloading file from {url} to {filename}")
     except IOError as e:
         logger.error(f"Error saving file from {url} to {filename}")
+
+
+def percent_error(actual: float, expected: float) -> float:
+    return (actual - expected) / expected * 100.0
