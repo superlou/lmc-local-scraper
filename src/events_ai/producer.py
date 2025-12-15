@@ -18,6 +18,8 @@ from moviepy.video.VideoClip import TextClip
 from pydantic import ValidationError
 from requests.exceptions import JSONDecodeError
 
+from events_ai.agents.research_agent_factory import ResearchAgentFactory
+
 from .agents.event_list_agent import EventListAgent, EventsResult
 from .agents.film_agent import FilmAgent
 from .agents.flat_event_page_agent import FlatEventPageAgent
@@ -51,20 +53,10 @@ class Producer:
         logger.info(f"Running {len(targets)} research targets")
 
         for target, config in targets.items():
-            if config["agent"] == "EventListAgent":
-                agent = EventListAgent(
-                    config["url"],
-                    use_selenium=config.get("use_selenium", False),
-                    start_url_params=config.get("url_params", None),
-                )
-            elif config["agent"] == "FlatEventPageAgent":
-                agent = FlatEventPageAgent(
-                    config["url"], use_selenium=config.get("use_selenium", False)
-                )
-            else:
-                logger.warning(
-                    f"Target {target} specified unknown agent {config['agent']}"
-                )
+            try:
+                agent = ResearchAgentFactory.build(**config)
+            except ValueError as exc:
+                logger.warning(f"Target {target} skipped: {exc}")
                 continue
 
             logger.info(f"Researching {target}")

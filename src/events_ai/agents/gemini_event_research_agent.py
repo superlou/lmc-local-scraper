@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
-
+from datetime import date
 
 from google import genai
 from google.genai.types import GenerateContentResponse
@@ -28,7 +29,7 @@ class TokenCounts:
     total: int = 0
 
 
-class GeminiEventResearchAgent:
+class GeminiEventResearchAgent(ABC):
     def __init__(self):
         self.tokens = TokenCounts()
 
@@ -57,3 +58,12 @@ class GeminiEventResearchAgent:
         self.tokens.prompt += usage.prompt_token_count or 0
         self.tokens.candidates += usage.candidates_token_count or 0
         self.tokens.total += response.usage_metadata.total_token_count or 0
+
+    @abstractmethod
+    def run(
+        self,
+        llm: genai.Client,
+        events_start: date,
+        events_finish: date,
+    ) -> EventsResult:
+        pass

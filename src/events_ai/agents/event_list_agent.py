@@ -28,11 +28,7 @@ class EventListAgent(GeminiEventResearchAgent):
         super().__init__()
 
     def run(
-        self,
-        llm: genai.Client,
-        events_start: date,
-        events_finish: date,
-        event_pages_limit: int | None = None,
+        self, llm: genai.Client, events_start: date, events_finish: date
     ) -> EventsResult:
         url = self.start_url
 
