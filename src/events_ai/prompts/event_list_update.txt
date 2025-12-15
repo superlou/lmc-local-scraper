@@ -1,4 +1,4 @@
-The known information about the event is in the following JSON structure:\n"
+The known information about the event is in the following JSON structure:
 
 {event}
 
