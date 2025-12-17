@@ -19,6 +19,7 @@ from pydantic import ValidationError
 from requests.exceptions import JSONDecodeError
 
 from events_ai.agents.research_agent_factory import ResearchAgentFactory
+from events_ai.phonetic_replacer import PhoneticReplacer
 
 from .agents.event_list_agent import EventListAgent, EventsResult
 from .agents.film_agent import FilmAgent
@@ -195,11 +196,19 @@ class Producer:
     def film_clips(self, takes_filter: list[int] | None = None):
         storyboard_path = self.path / "storyboard.json"
         storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
+        phonetic_replacer = PhoneticReplacer(
+            json.loads((ASSETS_DIR / "heygen_pronunciation.json").read_text())
+        )
+
         takes = [
             take
             for take in storyboard.takes
             if takes_filter is None or take.id in takes_filter
         ]
+
+        for take in takes:
+            take.text = phonetic_replacer.replace(take.text)
+
         self.start_clip_jobs(takes)
         self.wait_and_download_clip_jobs()
 
