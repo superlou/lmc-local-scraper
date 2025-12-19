@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+        :root {
+            --title-duration: {{duration[0]}}s;
+        }
+        </style>
+        <link rel="stylesheet" href="event_info.css" />
+    </head>
+    <body>
+        <div class="event-info animated">
+            <div class="decoration"></div>
+            <div class="name">{{name[0]}}</div>
+            <div class="info-line">
+                <img src="calendar_clock_32dp_000000_FILL0_wght400_GRAD0_opsz40.png">
+                <span>{{when[0]}}</span>
+            </div>
+            <div class="info-line">
+                <img src="location_on_32dp_000000_FILL0_wght400_GRAD0_opsz40.png">
+                <span>{{where[0]}}</span>
+            </div>
+        </div>
+    </body>
+</html>

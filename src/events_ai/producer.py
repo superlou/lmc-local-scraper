@@ -214,24 +214,53 @@ class Producer:
 
     def produce_video(self, today: date):
         titler = Titler(ASSETS_DIR / "titles")
+
+        storyboard_path = self.path / "storyboard.json"
+        storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
+
+        clips = []
+
+        # Add graphics to intro
+        intro = VideoFileClip(self.path / f"clip_{storyboard.takes[0].id}.mp4")
         titler.generate(
             f"tag_bottom_left.html?text={today.strftime('%m/%d/%Y')}",
             5,
-            self.path / "frames",
+            self.path / "frames_intro",
             self.path / "title_intro.webm",
+            frame_rate=25,
         )
-
-        clip_files = sorted(self.path.glob("clip_*.mp4"))
-        logger.info(f"Found {len(clip_files)} clips")
-
-        intro = VideoFileClip(clip_files[0])
         title = VideoFileClip(self.path / "title_intro.webm", has_mask=True)
-        intro = CompositeVideoClip([intro, title])
+        clips.append(CompositeVideoClip([intro, title]))
 
-        video = concatenate_videoclips(
-            [intro] + [VideoFileClip(clip_file) for clip_file in clip_files[1:]]
-        )
+        # Add graphics to event clips
+        for take in storyboard.takes[1:-1]:
+            clip = VideoFileClip(self.path / f"clip_{take.id}.mp4")
+            print(clip.duration)
+            props = {
+                "name": take.title,
+                "when": take.when,
+                "where": take.where,
+                "duration": clip.duration,
+            }
+            url = "event_info.html?" + "&".join([f"{k}={v}" for k, v in props.items()])
+            take_id = Path(clip.filename).stem
 
+            titler.generate(
+                url,
+                clip.duration,
+                self.path / f"frames_{take_id}",
+                self.path / f"title_{take_id}.webm",
+                frame_rate=25,
+            )
+
+            title = VideoFileClip(self.path / f"title_{take_id}.webm", has_mask=True)
+            clips.append(CompositeVideoClip([clip, title]))
+
+        # Add outro
+        clips.append(VideoFileClip(self.path / f"clip_{storyboard.takes[-1].id}.mp4"))
+
+        # Concatenate all titled clips
+        video = concatenate_videoclips(clips)
         output_path = self.path / "video.mp4"
         logger.info(f"Writing video to {output_path}...")
         video.write_videofile(output_path)

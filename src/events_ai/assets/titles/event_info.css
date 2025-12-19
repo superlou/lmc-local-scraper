@@ -1,0 +1,102 @@
+html {
+    background: white;
+}
+
+body {
+    background: repeating-conic-gradient(#e0e0e0 0 25%, #00000004 0 50%) 50% /
+        20px 20px;
+    width: 720px;
+    height: 1280px;
+    padding: 0px;
+    margin: 0px;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes superman-fly-right {
+    from {
+        transform: translateX(100vw);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@property --gradient-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+.event-info {
+    position: absolute;
+    top: 75%;
+
+    font-family: sans-serif;
+    font-size: 24pt;
+    margin: 0em 2em;
+    padding: 0.4em 0.8em;
+
+    background:
+        linear-gradient(#fff, #fff) padding-box,
+        linear-gradient(var(--gradient-angle), #3f5eab, #6f8ecb) border-box;
+    border-radius: 16px;
+    border: 8px solid transparent;
+    box-shadow: 0px 5px 15px #0008;
+    animation:
+        AnimateBorder 5s linear infinite,
+        FlyIn 0.5s ease-in-out forwards,
+        FlyOut 0.5s calc(var(--title-duration) - 0.5s) ease-in-out forwards;
+}
+
+@keyframes FlyIn {
+    0% {
+        transform: translateX(-100vw);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes FlyOut {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(100vw);
+    }
+}
+
+@keyframes AnimateBorder {
+    0% {
+        --gradient-angle: 0deg;
+    }
+    100% {
+        --gradient-angle: 359.9deg;
+    }
+}
+
+.name {
+    text-align: center;
+    padding-bottom: 0.4em;
+    font-family: Gotham;
+    font-weight: 600;
+    color: #3f5eab;
+}
+
+.event-info .info-line {
+    padding-bottom: 0.4em;
+}
+
+.info-line {
+    text-align: left;
+    font-size: 20pt;
+    font-family: sans-serif;
+    display: flex;
+    align-items: flex-start;
+}
+
+.info-line span {
+    padding-left: 1em;
+    padding-top: 3px;
+}
