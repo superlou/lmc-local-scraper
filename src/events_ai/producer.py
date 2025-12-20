@@ -263,7 +263,7 @@ class Producer:
         video = concatenate_videoclips(clips)
         output_path = self.path / "video.mp4"
         logger.info(f"Writing video to {output_path}...")
-        video.write_videofile(output_path)
+        video.write_videofile(output_path, audio_codec="aac")
         logger.info(f"Wrote video to {output_path}")
 
 
