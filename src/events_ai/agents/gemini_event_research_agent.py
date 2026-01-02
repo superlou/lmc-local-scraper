@@ -30,13 +30,16 @@ class TokenCounts:
 
 
 class GeminiEventResearchAgent(ABC):
-    def __init__(self):
+    def __init__(self, llm: genai.Client, events_start: date, events_finish: date):
         self.tokens = TokenCounts()
+        self.llm = llm
+        self.events_start = events_start
+        self.events_finish = events_finish
 
     def ask_gemini(
-        self, llm: genai.Client, model: str, prompt: str, response_schema
+        self, model: str, prompt: str, response_schema
     ) -> GenerateContentResponse:
-        response = llm.models.generate_content(
+        response = self.llm.models.generate_content(
             model=model,
             contents=prompt,
             config=genai.types.GenerateContentConfig(
@@ -60,10 +63,5 @@ class GeminiEventResearchAgent(ABC):
         self.tokens.total += response.usage_metadata.total_token_count or 0
 
     @abstractmethod
-    def run(
-        self,
-        llm: genai.Client,
-        events_start: date,
-        events_finish: date,
-    ) -> EventsResult:
+    def run(self) -> EventsResult:
         pass

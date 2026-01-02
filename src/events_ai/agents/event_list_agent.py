@@ -18,18 +18,22 @@ logger = structlog.get_logger()
 
 class EventListAgent(GeminiEventResearchAgent):
     def __init__(
-        self, start_url: str, use_selenium: bool = False, start_url_params=None
+        self,
+        llm: genai.Client,
+        events_start: date,
+        events_finish: date,
+        start_url: str,
+        use_selenium: bool = False,
+        start_url_params=None,
     ):
         self.start_url = start_url
         self.start_url_params: dict | None = start_url_params
         parsed_url = urlparse(self.start_url)
         self.url_base = f"{parsed_url.scheme}://{parsed_url.netloc}"
         self.use_selenium = use_selenium
-        super().__init__()
+        super().__init__(llm, events_start, events_finish)
 
-    def run(
-        self, llm: genai.Client, events_start: date, events_finish: date
-    ) -> EventsResult:
+    def run(self) -> EventsResult:
         url = self.start_url
 
         if self.start_url_params:
@@ -41,8 +45,8 @@ class EventListAgent(GeminiEventResearchAgent):
                         eval(
                             value,
                             {
-                                "events_start": events_start,
-                                "events_finish": events_finish,
+                                "events_start": self.events_start,
+                                "events_finish": self.events_finish,
                             },
                         )
                     )
@@ -55,11 +59,11 @@ class EventListAgent(GeminiEventResearchAgent):
         prompt = build_prompt(
             "event_list_start.txt",
             start_page=start_page,
-            year=events_start.year,
-            start_date=events_start.isoformat(),
-            finish_date=events_finish.isoformat(),
+            year=self.events_start.year,
+            start_date=self.events_start.isoformat(),
+            finish_date=self.events_finish.isoformat(),
         )
-        response = self.ask_gemini(llm, "gemini-2.5-flash-lite", prompt, EventsResult)
+        response = self.ask_gemini("gemini-2.5-flash-lite", prompt, EventsResult)
 
         if response is None:
             return EventsResult(events=[])
@@ -73,16 +77,16 @@ class EventListAgent(GeminiEventResearchAgent):
         with ThreadPoolExecutor(max_workers=8) as executor:
 
             def threaded_update_from_link(params):
-                return self.update_from_link(params[0], params[1])
+                return self.update_from_link(params[0])
 
             updated_events = executor.map(
-                threaded_update_from_link, [(llm, event) for event in result.events]
+                threaded_update_from_link, [(event,) for event in result.events]
             )
 
         result.events = list(updated_events)
         return result
 
-    def update_from_link(self, llm: genai.Client, event: Event) -> Event:
+    def update_from_link(self, event: Event) -> Event:
         if event.link is None:
             return event
 
@@ -92,6 +96,6 @@ class EventListAgent(GeminiEventResearchAgent):
             event=event.model_dump_json(),
             page=page,
         )
-        response = self.ask_gemini(llm, "gemini-2.5-flash-lite", prompt, Event)
+        response = self.ask_gemini("gemini-2.5-flash-lite", prompt, Event)
         new_event: Event = response.parsed
         return new_event

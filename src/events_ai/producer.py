@@ -38,6 +38,7 @@ class Producer:
 
     def research_events(self, targets, today: date, filter: list[str] | None = None):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        finish = today + relativedelta(months=1)
 
         all_targets = targets
         logger.info(f"Found {len(all_targets)} research targets")
@@ -55,14 +56,13 @@ class Producer:
 
         for target, config in targets.items():
             try:
-                agent = ResearchAgentFactory.build(**config)
+                agent = ResearchAgentFactory.build(llm, today, finish, **config)
             except ValueError as exc:
                 logger.warning(f"Target {target} skipped: {exc}")
                 continue
 
             logger.info(f"Researching {target}")
-            finish = today + relativedelta(months=1)
-            result = agent.run(llm, today, finish)
+            result = agent.run()
             df = result_to_df(result)
             df["organization"] = config["organization"]
             logger.info(f"Found {len(df)} events from {target}", tokens=agent.tokens)
