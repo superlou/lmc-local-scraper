@@ -43,10 +43,8 @@ organization = "Larchmont Public Library"
 [tom]
 agent = "EventListAgent"
 url = "https://www.townofmamaroneckny.gov/calendar.aspx"
+url_params = "startDate={events_start:%m/%d/%Y}&enddate={events_finish:%m/%d/%Y}"
 organization = "Town of Mamaroneck"
-[tom.url_params]
-startDate = "events_start.strftime('%m/%d/%Y')"
-enddate = "events_finish.strftime('%m/%d/%Y')"
 
 [mamaroneck_artists_guild]
 agent = "FlatEventPageAgent"

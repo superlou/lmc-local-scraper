@@ -27,7 +27,7 @@ class EventListAgent(GeminiEventResearchAgent):
         start_url_params=None,
     ):
         self.start_url = start_url
-        self.start_url_params: dict | None = start_url_params
+        self.start_url_params: str | None = start_url_params
         parsed_url = urlparse(self.start_url)
         self.url_base = f"{parsed_url.scheme}://{parsed_url.netloc}"
         self.use_selenium = use_selenium
@@ -37,22 +37,11 @@ class EventListAgent(GeminiEventResearchAgent):
         url = self.start_url
 
         if self.start_url_params:
-            url += "?" + "&".join(
-                [
-                    name
-                    + "="
-                    + str(
-                        eval(
-                            value,
-                            {
-                                "events_start": self.events_start,
-                                "events_finish": self.events_finish,
-                            },
-                        )
-                    )
-                    for name, value in self.start_url_params.items()
-                ]
-            )
+            param_vars = {
+                "events_start": self.events_start,
+                "events_finish": self.events_finish,
+            }
+            url += "?" + self.start_url_params.format(**param_vars)
 
         start_page = simplify_url.get(url, use_selenium=self.use_selenium)
 
