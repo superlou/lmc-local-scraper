@@ -5,8 +5,8 @@ import structlog
 from google import genai
 
 from .. import simplify_url
-from .agent_util import build_prompt
 from .gemini_event_research_agent import EventsResult, GeminiEventResearchAgent
+from .prompt import build_prompt
 
 logger = structlog.get_logger()
 
@@ -29,13 +29,12 @@ class FlatEventPageAgent(GeminiEventResearchAgent):
     def run(self) -> EventsResult:
         page = simplify_url.get(self.start_url, use_selenium=self.use_selenium)
         prompt = build_prompt(
-            "flat_events.txt",
+            "flat_events.txt.jinja2",
             page=page,
             link=self.start_url,
-            year=self.events_start.year,
-            today=self.events_start.isoformat(),
-            start_date=self.events_start.isoformat(),
-            finish_date=self.events_finish.isoformat(),
+            today=self.events_start,
+            start_date=self.events_start,
+            finish_date=self.events_finish,
         )
         response = self.ask_gemini("gemini-2.5-flash-lite", prompt, EventsResult)
 

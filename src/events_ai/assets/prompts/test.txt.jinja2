@@ -1,0 +1,11 @@
+This prompt is only used for unit tests.
+
+{% for item in items %}
+* {{ item }}
+{% endfor %}
+
+{% if mouse %}
+The mouse is conditionally included.
+{% endif %}
+
+{{day}}, {{day | date_american}}, {{day | date_year}}

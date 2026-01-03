@@ -11,6 +11,7 @@ dependencies = [
     "google-genai>=1.30.0",
     "htmlcorder",
     "icalendar>=6.3.1",
+    "jinja2>=3.1.6",
     "loguru>=0.7.3",
     "lxml>=5.3.1",
     "markdownify>=1.2.0",
@@ -37,6 +38,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "devtools>=0.12.2",
+    "pytest>=9.0.2",
 ]
 
 [tool.uv.sources]

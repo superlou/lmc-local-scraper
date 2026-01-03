@@ -6,7 +6,7 @@ from loguru import logger
 from PIL import Image
 from pydantic import BaseModel
 
-from .agent_util import build_prompt
+from .prompt import build_prompt
 from .script_writer_agent import ScriptResult
 
 
@@ -85,7 +85,9 @@ class StoryboardAgent:
         return result
 
     def generate_frame(self, llm, background_desc: str, frame_path: str):
-        prompt = build_prompt("background.txt", background_description=background_desc)
+        prompt = build_prompt(
+            "background.txt.jinja2", background_description=background_desc
+        )
         response = llm.models.generate_content(
             model="gemini-2.5-flash-image-preview",
             contents=prompt,
@@ -103,7 +105,9 @@ class StoryboardAgent:
                 image.save(frame_path)
 
     def generate_frame_from_base(self, llm, background_desc: str, frame_path: str):
-        prompt = build_prompt("frame.txt", background_description=background_desc)
+        prompt = build_prompt(
+            "frame.txt.jinja2", background_description=background_desc
+        )
 
         response = llm.models.generate_content(
             model="gemini-2.5-flash-image-preview",
