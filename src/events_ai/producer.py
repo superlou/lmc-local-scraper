@@ -133,10 +133,10 @@ class Producer:
     def start_clip_jobs(self, takes: list[Take]):
         client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
         quota_response = client.check_quota()
-        logger.info("Checked HeyGen quota", response=quota_response)
+        logger.info(f"Checked HeyGen quota: {quota_response}")
 
         for take in takes:
-            agent = FilmAgent(os.environ["HEYGEN_API_KEY"], take.text, take.frame)
+            agent = FilmAgent(client, take.text, take.frame)
             video_id = agent.run()
 
             clip_job = {

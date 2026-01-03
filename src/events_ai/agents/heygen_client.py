@@ -221,7 +221,7 @@ class HeyGenClient:
     def create_avatar_video_v2(
         self, request_data: CreateAvatarVideoV2Request
     ) -> CreateAvatarVideoV2Response:
-        print(request_data.model_dump_json(indent=2, exclude_unset=True))
+        # print(request_data.model_dump_json(indent=2, exclude_unset=True))
 
         response = requests.post(
             "https://api.heygen.com/v2/video/generate",
