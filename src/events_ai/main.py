@@ -38,8 +38,8 @@ def main_cli():
     producer = Producer(working_dir, (720, 1280))
 
     if args.research is not None:
-        research_config = importlib.resources.files(__name__) / "research.toml"
-        all_targets = tomllib.load(open(research_config, "rb"))
+        research_config = importlib.resources.files(__name__) / "assets/research.toml"
+        all_targets = tomllib.load(research_config.open("rb"))
         producer.research_events(
             all_targets, today, args.research if len(args.research) > 0 else None
         )
@@ -60,7 +60,3 @@ def main_cli():
 
     if args.produce:
         producer.produce_video(today)
-
-
-if __name__ == "__main__":
-    main()
