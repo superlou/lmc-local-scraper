@@ -2,8 +2,7 @@ import importlib.resources
 import json
 import os
 import time
-from datetime import date, datetime
-from glob import glob
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -14,16 +13,13 @@ from google import genai
 from htmlcorder.titler import Titler
 from loguru import logger
 from moviepy import CompositeVideoClip, VideoFileClip, concatenate_videoclips
-from moviepy.video.VideoClip import TextClip
 from pydantic import ValidationError
-from requests.exceptions import JSONDecodeError
 
 from events_ai.agents.research_agent_factory import ResearchAgentFactory
 from events_ai.phonetic_replacer import PhoneticReplacer
 
-from .agents.event_list_agent import EventListAgent, EventsResult
 from .agents.film_agent import FilmAgent
-from .agents.flat_event_page_agent import FlatEventPageAgent
+from .agents.gemini_event_research_agent import EventsResult
 from .agents.heygen_client import HeyGenClient
 from .agents.script_writer_agent import ScriptResult, ScriptWriterAgent
 from .agents.storyboard_agent import StoryboardAgent, StoryboardResult, Take
@@ -309,8 +305,10 @@ def download_file(url: str, filename: str | Path):
                 f.write(chunk)
     except requests.exceptions.RequestException as e:
         logger.error(f"Error downloading file from {url} to {filename}")
+        logger.error(e)
     except IOError as e:
         logger.error(f"Error saving file from {url} to {filename}")
+        logger.error(e)
 
 
 def percent_error(actual: float, expected: float) -> float:

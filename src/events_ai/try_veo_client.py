@@ -1,6 +1,8 @@
 import os
+
 from dotenv import load_dotenv
-from agents.veo_agent import VeoClient
+
+from .agents.veo_agent import VeoClient
 
 
 def main():

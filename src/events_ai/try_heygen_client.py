@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from agents.heygen_client import (
+from .agents.heygen_client import (
     AvatarStyle,
     Background,
     BackgroundType,

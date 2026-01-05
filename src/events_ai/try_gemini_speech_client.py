@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from agents.dialogue_agent import GeminiSpeechClient
+from .agents.dialogue_agent import GeminiSpeechClient
 
 
 def main():

@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from agents.sora_agent import SoraClient
+from .agents.sora_agent import SoraClient
 
 
 def main():

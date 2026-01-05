@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 from loguru import logger
 from markdownify import markdownify
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 
 
 def get(url: str, use_selenium=False) -> str:

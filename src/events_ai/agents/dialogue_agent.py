@@ -1,4 +1,3 @@
-import time
 import wave
 
 from google import genai
