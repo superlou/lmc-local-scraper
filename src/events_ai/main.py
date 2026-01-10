@@ -7,6 +7,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from loguru import logger
 
+from events_ai.gen_path_manager import GenPathManager
+
 from .producer import Producer
 
 load_dotenv()
@@ -27,10 +29,15 @@ def main_cli():
 
     today = date.fromisoformat(args.today) if args.today else date.today()
 
-    working_dir = Path(
-        args.working_dir if args.working_dir else Path("gen") / today.isoformat()
-    )
+    gen_path_manager = GenPathManager("gen")
+
+    if args.working_dir:
+        working_dir = Path(args.working_dir)
+    else:
+        working_dir = gen_path_manager.by_date(today)
+
     working_dir.mkdir(exist_ok=True)
+
     logger.add(working_dir / "log.txt")
     logger.info(f"Today is {today.strftime('%Y-%m-%d')}")
     logger.info(f"Working in {working_dir}")
@@ -50,7 +57,7 @@ def main_cli():
         except Exception:
             num_events = 4
 
-        producer.write_script(today, num_events)
+        producer.write_script(today, num_events, gen_path_manager.find_recent(today, 3))
 
     if args.storyboard:
         producer.make_storyboard()

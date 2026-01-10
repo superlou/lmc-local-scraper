@@ -2,6 +2,7 @@ from datetime import date
 
 import pandas as pd
 from google import genai
+from loguru import logger
 from pydantic import BaseModel
 
 from .prompt import build_prompt
@@ -31,10 +32,17 @@ class ScriptResult(BaseModel):
 
 
 class ScriptWriterAgent:
-    def __init__(self, events: pd.DataFrame, today: date, num_events: int):
+    def __init__(
+        self,
+        events: pd.DataFrame,
+        today: date,
+        num_events: int,
+        recent_scripts: list[ScriptResult],
+    ):
         self.events = events
         self.num_events = num_events
         self.today = today
+        self.recent_scripts = recent_scripts
 
     def run(self, llm: genai.Client) -> ScriptResult:
         prompt = build_prompt(
@@ -42,7 +50,10 @@ class ScriptWriterAgent:
             date=self.today,
             csv=self.events.to_csv(),
             num_events=self.num_events,
+            recent_scripts=self.recent_scripts,
         )
+
+        logger.debug(f"Script writer prompt: {prompt}")
 
         response = llm.models.generate_content(
             model="gemini-2.5-flash",
@@ -54,4 +65,6 @@ class ScriptWriterAgent:
             ),
         )
 
-        return response.parsed
+        parsed: ScriptResult = response.parsed
+        logger.debug(f"Script writer result: {parsed}")
+        return parsed

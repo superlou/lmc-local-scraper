@@ -71,12 +71,20 @@ class Producer:
         df.to_csv(events_path)
         logger.info(f"Collected {len(df)} events into {events_path}")
 
-    def write_script(self, today: date, num_events: int):
+    def write_script(
+        self, today: date, num_events: int, recent_working_dirs: list[Path]
+    ):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+        recent_scripts = [
+            ScriptResult.model_validate_json(open(script_path).read())
+            for dir in recent_working_dirs
+            if (script_path := dir / "script.json").exists()
+        ]
 
         df = pd.read_csv(self.path / "events.csv")
         logger.info(f"Loaded {len(df)} events to write script.")
-        script_writer = ScriptWriterAgent(df, today, num_events)
+        script_writer = ScriptWriterAgent(df, today, num_events, recent_scripts)
         script = script_writer.run(llm)
 
         script_path = self.path / "script.json"
