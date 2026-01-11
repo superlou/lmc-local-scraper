@@ -63,16 +63,16 @@ class Producer:
             df = result_to_df(result)
             df["organization"] = config["organization"]
             logger.info(f"Found {len(df)} events from {target}", tokens=agent.tokens)
-            df.to_csv(self.path / f"events_{target}.csv")
+            df.to_csv(self.path / f"events_{target}.csv", index_label="id")
 
         events_files = self.path.glob("events_*.csv")
         df = pd.concat(
-            [pd.read_csv(filename, index_col=0) for filename in events_files],
+            [pd.read_csv(filename, index_col="id") for filename in events_files],
             ignore_index=True,
         )
 
         events_path = self.path / "events.csv"
-        df.to_csv(events_path)
+        df.to_csv(events_path, index_label="id")
         logger.info(f"Collected {len(df)} events into {events_path}")
 
     def write_script(
@@ -86,7 +86,7 @@ class Producer:
             if (script_path := dir / "script.json").exists()
         ]
 
-        df = pd.read_csv(self.path / "events.csv", index_col=0)
+        df = pd.read_csv(self.path / "events.csv", index_col="id")
         logger.info(f"Loaded {len(df)} events to write script.")
         script_writer = ScriptWriterAgent(df, today, num_events, recent_scripts)
         script = script_writer.run(llm)
