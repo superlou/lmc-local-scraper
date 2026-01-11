@@ -13,6 +13,7 @@ from google import genai
 from htmlcorder.titler import Titler
 from loguru import logger
 from moviepy import CompositeVideoClip, VideoFileClip, concatenate_videoclips
+from numpy.char import index
 from pydantic import ValidationError
 
 from events_ai.agents.research_agent_factory import ResearchAgentFactory
@@ -65,7 +66,10 @@ class Producer:
             df.to_csv(self.path / f"events_{target}.csv")
 
         events_files = self.path.glob("events_*.csv")
-        df = pd.concat([pd.read_csv(filename) for filename in events_files])
+        df = pd.concat(
+            [pd.read_csv(filename, index_col=0) for filename in events_files],
+            ignore_index=True,
+        )
 
         events_path = self.path / "events.csv"
         df.to_csv(events_path)
@@ -82,7 +86,7 @@ class Producer:
             if (script_path := dir / "script.json").exists()
         ]
 
-        df = pd.read_csv(self.path / "events.csv")
+        df = pd.read_csv(self.path / "events.csv", index_col=0)
         logger.info(f"Loaded {len(df)} events to write script.")
         script_writer = ScriptWriterAgent(df, today, num_events, recent_scripts)
         script = script_writer.run(llm)
