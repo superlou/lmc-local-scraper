@@ -17,6 +17,7 @@ from numpy.char import index
 from pydantic import ValidationError
 
 from events_ai.agents.research_agent_factory import ResearchAgentFactory
+from events_ai.agents.social_media_writer_agent import SocialMediaWriterAgent
 from events_ai.phonetic_replacer import PhoneticReplacer
 
 from .agents.film_agent import FilmAgent
@@ -273,6 +274,23 @@ class Producer:
         logger.info(f"Writing video to {output_path}...")
         video.write_videofile(output_path, audio_codec="aac")
         logger.info(f"Wrote video to {output_path}")
+
+    def write_social_media_post(self, today: date):
+        llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+
+        script_path = self.path / "script.json"
+        script = ScriptResult.model_validate_json(open(script_path).read())
+        print(script)
+
+        writer = SocialMediaWriterAgent(script, today)
+        post_text = writer.run(llm)
+
+        post_path = self.path / "post.txt"
+
+        with open(post_path, "w") as post_file:
+            post_file.write(post_text)
+
+        logger.info(f"Post written to {post_path}")
 
 
 class ProducerDimensionsInvalid(Exception):

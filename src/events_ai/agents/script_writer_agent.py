@@ -23,6 +23,8 @@ class Story(BaseModel):
     title: str
     when: str
     where: str
+    link: str | None
+    organization: str
 
 
 class ScriptResult(BaseModel):

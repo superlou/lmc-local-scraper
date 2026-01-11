@@ -22,6 +22,7 @@ def main_cli():
     parser.add_argument("-s", "--storyboard", action="store_true")
     parser.add_argument("-f", "--film", nargs="*", type=int)
     parser.add_argument("-p", "--produce", action="store_true")
+    parser.add_argument("-c", "--create-post", action="store_true")
     parser.add_argument("--working-dir")
     parser.add_argument("--today")
 
@@ -67,3 +68,6 @@ def main_cli():
 
     if args.produce:
         producer.produce_video(today)
+
+    if args.create_post:
+        producer.write_social_media_post(today)
