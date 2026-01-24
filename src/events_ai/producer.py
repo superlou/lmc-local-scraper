@@ -117,7 +117,7 @@ class Producer:
 
         storyboard = StoryboardAgent(
             script,
-            str(ASSETS_DIR / "bookend_backdrop.png"),
+            str(ASSETS_DIR / "studio_backdrop.jpg"),
             self.path,
             gen_aspect_ratio,
         )
@@ -231,9 +231,15 @@ class Producer:
 
         # Add graphics to intro
         intro = VideoFileClip(self.path / f"clip_{storyboard.takes[0].id}.mp4")
+        props = {
+            "title": "Harbor Happenings",
+            "subtitle": "For " + today.strftime("%m/%d/%Y"),
+            "duration": intro.duration,
+        }
+        url = "intro_outro.html?" + "&".join([f"{k}={v}" for k, v in props.items()])
         titler.generate(
-            f"tag_bottom_left.html?text={today.strftime('%m/%d/%Y')}",
-            5,
+            url,
+            intro.duration,
             self.path / "frames_intro",
             self.path / "title_intro.webm",
             frame_rate=25,
@@ -266,7 +272,22 @@ class Producer:
             clips.append(CompositeVideoClip([clip, title]))
 
         # Add outro
-        clips.append(VideoFileClip(self.path / f"clip_{storyboard.takes[-1].id}.mp4"))
+        outro = VideoFileClip(self.path / f"clip_{storyboard.takes[-1].id}.mp4")
+        props = {
+            "title": "Thanks for Watching",
+            "subtitle": "See you tomorrow!",
+            "duration": outro.duration,
+        }
+        url = "intro_outro.html?" + "&".join([f"{k}={v}" for k, v in props.items()])
+        titler.generate(
+            url,
+            outro.duration,
+            self.path / "frames_outro",
+            self.path / "title_outro.webm",
+            frame_rate=25,
+        )
+        title = VideoFileClip(self.path / "title_outro.webm", has_mask=True)
+        clips.append(CompositeVideoClip([outro, title]))
 
         # Concatenate all titled clips
         video = concatenate_videoclips(clips)
