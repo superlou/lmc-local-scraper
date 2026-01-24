@@ -1,5 +1,6 @@
 Given the following CSV file containing event information, write a news script.
 Choose the {{num_events}} most exciting events within 7 days of {{date}}.
+Avoid selecting multiple events from the same organization.
 
 {% if recent_scripts | length > 0 %}
 Do NOT include the following events, as they were already used in recent scripts:

@@ -89,7 +89,7 @@ class StoryboardAgent:
             "background.txt.jinja2", background_description=background_desc
         )
         response = llm.models.generate_content(
-            model="gemini-2.5-flash-image-preview",
+            model="gemini-2.5-flash-image",
             contents=prompt,
             config=genai.types.GenerateContentConfig(
                 response_modalities=["Image"],
@@ -110,7 +110,7 @@ class StoryboardAgent:
         )
 
         response = llm.models.generate_content(
-            model="gemini-2.5-flash-image-preview",
+            model="gemini-2.5-flash-image",
             contents=[prompt, self.base_image],
             config=genai.types.GenerateContentConfig(
                 response_modalities=["Image"],
