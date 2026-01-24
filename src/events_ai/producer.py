@@ -20,6 +20,7 @@ from events_ai.agents.research_agent_factory import ResearchAgentFactory
 from events_ai.agents.social_media_writer_agent import SocialMediaWriterAgent
 from events_ai.phonetic_replacer import PhoneticReplacer
 
+from . import humanize
 from .agents.film_agent import FilmAgent
 from .agents.gemini_event_research_agent import EventsResult
 from .agents.heygen_client import HeyGenClient
@@ -233,7 +234,7 @@ class Producer:
         intro = VideoFileClip(self.path / f"clip_{storyboard.takes[0].id}.mp4")
         props = {
             "title": "Harbor Happenings",
-            "subtitle": "For " + today.strftime("%m/%d/%Y"),
+            "subtitle": "For " + humanize.long_date(today),
             "duration": intro.duration,
         }
         url = "intro_outro.html?" + "&".join([f"{k}={v}" for k, v in props.items()])
@@ -250,7 +251,6 @@ class Producer:
         # Add graphics to event clips
         for take in storyboard.takes[1:-1]:
             clip = VideoFileClip(self.path / f"clip_{take.id}.mp4")
-            print(clip.duration)
             props = {
                 "name": take.title,
                 "when": take.when,
@@ -301,7 +301,6 @@ class Producer:
 
         script_path = self.path / "script.json"
         script = ScriptResult.model_validate_json(open(script_path).read())
-        print(script)
 
         writer = SocialMediaWriterAgent(script, today)
         post_text = writer.run(llm)
