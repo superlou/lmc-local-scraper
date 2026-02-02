@@ -233,7 +233,7 @@ class Producer:
         # Add graphics to intro
         intro = VideoFileClip(self.path / f"clip_{storyboard.takes[0].id}.mp4")
         props = {
-            "title": "Harbor Happenings",
+            "title": "Around Town with LMC",
             "subtitle": "For " + humanize.long_date(today),
             "duration": intro.duration,
         }
