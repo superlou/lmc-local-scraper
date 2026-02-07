@@ -59,12 +59,17 @@ class Producer:
                 logger.warning(f"Target {target} skipped: {exc}")
                 continue
 
-            logger.info(f"Researching {target}")
-            result = agent.run()
-            df = result_to_df(result)
-            df["organization"] = config["organization"]
-            logger.info(f"Found {len(df)} events from {target}", tokens=agent.tokens)
-            df.to_csv(self.path / f"events_{target}.csv", index_label="id")
+            try:
+                logger.info(f"Researching {target}")
+                result = agent.run()
+                df = result_to_df(result)
+                df["organization"] = config["organization"]
+                logger.info(
+                    f"Found {len(df)} events from {target}", tokens=agent.tokens
+                )
+                df.to_csv(self.path / f"events_{target}.csv", index_label="id")
+            except Exception as err:
+                logger.warning(f"Exception researching {target}: {err}")
 
         events_files = self.path.glob("events_*.csv")
         df = pd.concat(

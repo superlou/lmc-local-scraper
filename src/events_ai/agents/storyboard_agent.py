@@ -1,7 +1,9 @@
+import time
 from io import BytesIO
 from pathlib import Path
 
 from google import genai
+from google.genai.types import FinishReason
 from loguru import logger
 from PIL import Image
 from pydantic import BaseModel
@@ -84,7 +86,9 @@ class StoryboardAgent:
         )
         return result
 
-    def generate_frame(self, llm, background_desc: str, frame_path: str):
+    def generate_frame(
+        self, llm: genai.Client, background_desc: str, frame_path: str, retries: int = 5
+    ):
         prompt = build_prompt(
             "background.txt.jinja2", background_description=background_desc
         )
@@ -97,7 +101,28 @@ class StoryboardAgent:
             ),
         )
 
-        for part in response.candidates[0].content.parts:
+        candidates = response.candidates or []
+
+        if len(candidates) < 1 and retries > 0:
+            logger.warning(
+                f"Image generation had no candidates. Waiting. Retries left: {retries}"
+            )
+            time.sleep(5)
+            return self.generate_frame(
+                llm, background_desc, frame_path, retries=retries - 1
+            )
+
+        candidate = candidates[0]
+        if candidate.finish_reason == FinishReason.NO_IMAGE and retries > 0:
+            logger.warning(
+                f"Image generation had no image. Waiting. Retries left: {retries}"
+            )
+            time.sleep(5)
+            return self.generate_frame(
+                llm, background_desc, frame_path, retries=retries - 1
+            )
+
+        for part in candidate.content.parts:
             if part.text is not None:
                 logger.info("Got text: " + part.text)
             elif part.inline_data is not None:

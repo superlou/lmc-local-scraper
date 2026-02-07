@@ -1,9 +1,12 @@
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
 
 from google import genai
+from google.genai.errors import ServerError
 from google.genai.types import GenerateContentResponse
+from loguru import logger
 from pydantic import BaseModel
 
 
@@ -37,19 +40,32 @@ class GeminiEventResearchAgent(ABC):
         self.events_finish = events_finish
 
     def ask_gemini(
-        self, model: str, prompt: str, response_schema
+        self, model: str, prompt: str, response_schema, retries: int = 5
     ) -> GenerateContentResponse:
-        response = self.llm.models.generate_content(
-            model=model,
-            contents=prompt,
-            config=genai.types.GenerateContentConfig(
-                thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
-                response_mime_type="application/json",
-                response_schema=response_schema,
-            ),
-        )
+        try:
+            response = self.llm.models.generate_content(
+                model=model,
+                contents=prompt,
+                config=genai.types.GenerateContentConfig(
+                    thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
+                    response_mime_type="application/json",
+                    response_schema=response_schema,
+                ),
+            )
 
-        self.count_tokens(response)
+            self.count_tokens(response)
+        except ServerError as err:
+            if err.code == 503 and retries > 0:
+                logger.warning(
+                    f"Gemini API overloaded. Waiting. Retries left: {retries}"
+                )
+                time.sleep(5)
+                return self.ask_gemini(
+                    model, prompt, response_schema, retries=retries - 1
+                )
+            else:
+                raise err
+
         return response
 
     def count_tokens(self, response: GenerateContentResponse):
