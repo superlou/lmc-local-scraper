@@ -4,11 +4,11 @@ import os
 import tomllib
 from datetime import date
 from pathlib import Path
-from typing import IO
 
 from dotenv import load_dotenv
 from loguru import logger
 
+import events_ai.check_setup as check_setup
 from events_ai.gen_path_manager import GenPathManager
 from events_ai.mailer import Mailer
 
@@ -20,6 +20,7 @@ load_dotenv()
 @logger.catch()
 def main_cli():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-k", "--skip-check", action="store_true")
     parser.add_argument("-r", "--research", nargs="*")
     parser.add_argument("-w", "--write", nargs="*")
     parser.add_argument("-s", "--storyboard", action="store_true")
@@ -58,6 +59,9 @@ def main_cli():
 
 
 def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, args):
+    if not args.skip_check:
+        check_setup.check()
+
     producer = Producer(working_dir, (720, 1280))
 
     if args.research is not None:
