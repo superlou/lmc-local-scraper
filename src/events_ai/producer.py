@@ -13,7 +13,6 @@ from google import genai
 from htmlcorder.titler import Titler
 from loguru import logger
 from moviepy import CompositeVideoClip, VideoFileClip, concatenate_videoclips
-from numpy.char import index
 from pydantic import ValidationError
 
 from events_ai.agents.research_agent_factory import ResearchAgentFactory
