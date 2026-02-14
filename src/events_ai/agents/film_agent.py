@@ -1,3 +1,4 @@
+import time
 from pathlib import Path
 
 from loguru import logger
@@ -20,17 +21,29 @@ from .heygen_client import (
 
 
 class FilmAgent:
-    def __init__(self, client: HeyGenClient, dialogue: str, background_path: str):
+    def __init__(
+        self,
+        client: HeyGenClient,
+        dialogue: str,
+        background_path: str,
+        title: str = "Test Video",
+    ):
         self.client = client
         self.dialogue = dialogue
         self.background_path = background_path
+        self.title = title
 
     def run(self) -> str | None:
         asset_name = Path(self.background_path).name
         logger.info(f"Uploading background asset: {asset_name}")
         response = self.client.upload_asset(self.background_path, asset_name)
         background_asset_id = response["data"]["id"]
-        logger.info(f"Asset ID: {background_asset_id}")
+        logger.info(f"Background asset ID: {background_asset_id}")
+        logger.debug(f"Uploaded asset response: {response}")
+
+        # Required for background image to fully load.
+        # HeyGen unable to confirm why.
+        time.sleep(30.0)
 
         scene = Scene(
             character=Character(
@@ -47,15 +60,16 @@ class FilmAgent:
                 input_text=self.dialogue,
             ),
             background=Background(
-                type=BackgroundType.IMAGE, image_asset_id=background_asset_id
+                type=BackgroundType.IMAGE,
+                image_asset_id=background_asset_id,
             ),
         )
-        logger.info(f"Requesting video generation: {scene}")
         request_data = CreateAvatarVideoV2Request(
-            title="Test Video",
+            title=self.title,
             dimension=Dimension(width=720, height=1280),
             video_inputs=[scene],
         )
+        logger.info(f"Requesting video generation: {request_data}")
         response = self.client.create_avatar_video_v2(request_data)
         logger.info(f"Video generation request response: {response}")
 

@@ -144,13 +144,14 @@ class Producer:
 
         logger.info(f"Created storyboard PDF at {storyboard_path}")
 
-    def start_clip_jobs(self, takes: list[Take]):
+    def start_clip_jobs(self, takes: list[Take], path: Path):
         client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
         quota_response = client.check_quota()
         logger.info(f"Checked HeyGen quota: {quota_response}")
 
         for take in takes:
-            agent = FilmAgent(client, take.text, take.frame)
+            title = f"Around Town, {path}, Take {take.id}"
+            agent = FilmAgent(client, take.text, take.frame, title)
             video_id = agent.run()
 
             clip_job = {
@@ -223,7 +224,7 @@ class Producer:
         for take in takes:
             take.text = phonetic_replacer.replace(take.text)
 
-        self.start_clip_jobs(takes)
+        self.start_clip_jobs(takes, self.path)
         self.wait_and_download_clip_jobs()
 
     def produce_video(self, today: date):

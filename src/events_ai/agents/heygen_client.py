@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any
 
 import requests
+from loguru import logger
 from pydantic import BaseModel
 
 
@@ -84,6 +85,8 @@ class Character(BaseModel):
     expression: Expression = Expression.DEFAULT
     scale: float = 1
     offset: Offset | None = None
+    matting: bool = False
+    super_resolution: bool | None = None
 
 
 class VoiceType(Enum):
@@ -221,11 +224,12 @@ class HeyGenClient:
     def create_avatar_video_v2(
         self, request_data: CreateAvatarVideoV2Request
     ) -> CreateAvatarVideoV2Response:
-        # print(request_data.model_dump_json(indent=2, exclude_unset=True))
+        request_json = request_data.model_dump_json(exclude_unset=True)
+        logger.debug(f"Create avatar video request: {request_json}")
 
         response = requests.post(
             "https://api.heygen.com/v2/video/generate",
-            data=request_data.json(exclude_unset=True),
+            data=request_json,
             headers=self.headers | {"content-type": "application/json"},
         )
 
