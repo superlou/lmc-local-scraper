@@ -42,29 +42,32 @@ class GeminiEventResearchAgent(ABC):
     def ask_gemini(
         self, model: str, prompt: str, response_schema, retries: int = 5
     ) -> GenerateContentResponse:
-        try:
-            response = self.llm.models.generate_content(
-                model=model,
-                contents=prompt,
-                config=genai.types.GenerateContentConfig(
-                    thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
-                    response_mime_type="application/json",
-                    response_schema=response_schema,
-                ),
-            )
+        done = False
 
-            self.count_tokens(response)
-        except ServerError as err:
-            if err.code == 503 and retries > 0:
-                logger.warning(
-                    f"Gemini API overloaded. Waiting. Retries left: {retries}"
+        while not done and retries > 0:
+            try:
+                response = self.llm.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=genai.types.GenerateContentConfig(
+                        thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
+                        response_mime_type="application/json",
+                        response_schema=response_schema,
+                    ),
                 )
-                time.sleep(5)
-                return self.ask_gemini(
-                    model, prompt, response_schema, retries=retries - 1
-                )
-            else:
-                raise err
+
+                self.count_tokens(response)
+                done = True
+            except ServerError as err:
+                if err.code == 503:
+                    logger.warning(
+                        f"Gemini API overloaded. Waiting. Retries left: {retries}"
+                    )
+                    time.sleep(5)
+                else:
+                    raise err
+
+            retries -= 1
 
         return response
 

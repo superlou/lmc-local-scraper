@@ -25,6 +25,10 @@ class StoryboardResult(BaseModel):
     takes: list[Take]
 
 
+class StoryboardImageGenerationError(Exception):
+    pass
+
+
 class StoryboardAgent:
     def __init__(
         self,
@@ -92,35 +96,49 @@ class StoryboardAgent:
         prompt = build_prompt(
             "background.txt.jinja2", background_description=background_desc
         )
-        response = llm.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=prompt,
-            config=genai.types.GenerateContentConfig(
-                response_modalities=["Image"],
-                image_config=genai.types.ImageConfig(aspect_ratio=self.aspect_ratio),
-            ),
-        )
 
-        candidates = response.candidates or []
+        done = False
 
-        if len(candidates) < 1 and retries > 0:
-            logger.warning(
-                f"Image generation had no candidates. Waiting. Retries left: {retries}"
-            )
-            time.sleep(5)
-            return self.generate_frame(
-                llm, background_desc, frame_path, retries=retries - 1
+        while not done and retries > 0:
+            response = llm.models.generate_content(
+                model="gemini-2.5-flash-image",
+                contents=prompt,
+                config=genai.types.GenerateContentConfig(
+                    response_modalities=["Image"],
+                    image_config=genai.types.ImageConfig(
+                        aspect_ratio=self.aspect_ratio
+                    ),
+                ),
             )
 
-        candidate = candidates[0]
-        if candidate.finish_reason == FinishReason.NO_IMAGE and retries > 0:
-            logger.warning(
-                f"Image generation had no image. Waiting. Retries left: {retries}"
-            )
-            time.sleep(5)
-            return self.generate_frame(
-                llm, background_desc, frame_path, retries=retries - 1
-            )
+            candidates = response.candidates or []
+
+            if len(candidates) < 1:
+                logger.warning(
+                    f"Image generation had no candidates. Waiting. Retries left: {retries}"
+                )
+
+                if retries > 0:
+                    retries -= 1
+                    time.sleep(5)
+                    continue
+                else:
+                    raise StoryboardImageGenerationError()
+
+            candidate = candidates[0]
+            if candidate.finish_reason == FinishReason.NO_IMAGE:
+                logger.warning(
+                    f"Image generation had no image. Waiting. Retries left: {retries}"
+                )
+
+                if retries > 0:
+                    retries -= 1
+                    time.sleep(5)
+                    continue
+                else:
+                    raise StoryboardImageGenerationError()
+
+            done = True
 
         for part in candidate.content.parts:
             if part.text is not None:
