@@ -51,8 +51,8 @@ class FilmAgent:
                 avatar_id="Georgia_expressive_2024112701",
                 avatar_style=AvatarStyle.NORMAL,
                 talking_style=TalkingStyle.EXPRESSIVE,
-                offset=Offset(x=0.0, y=0.09),
-                scale=1.71,
+                offset=Offset(x=0.0, y=0.10),
+                scale=1.3,
             ),
             voice=Voice(
                 type=VoiceType.TEXT,

@@ -1,6 +1,10 @@
+import importlib.resources
 import os
+import time
+from pathlib import Path
 
 from dotenv import load_dotenv
+from loguru import logger
 
 from .agents.heygen_client import (
     AvatarStyle,
@@ -11,11 +15,65 @@ from .agents.heygen_client import (
     CreateAvatarVideoV2Request,
     Dimension,
     HeyGenClient,
+    Offset,
     Scene,
     TalkingStyle,
     Voice,
     VoiceType,
 )
+
+ASSETS_DIR = importlib.resources.files(__name__) / "assets"
+
+
+def generate_position_test_video(client: HeyGenClient):
+    # todo This is a duplicate of FilmAgent. Refactor!
+    background_path = ASSETS_DIR / "studio_backdrop2.jpg"
+    dialogue = "Test Video!"
+
+    asset_name = background_path.name
+    logger.info(f"Uploading background asset: {asset_name}")
+    response = client.upload_asset(background_path, asset_name)
+    background_asset_id = response["data"]["id"]
+    logger.info(f"Background asset ID: {background_asset_id}")
+    logger.debug(f"Uploaded asset response: {response}")
+
+    # Required for background image to fully load.
+    # HeyGen unable to confirm why.
+    time.sleep(30.0)
+
+    offset = Offset(x=0.0, y=0.10)
+    scale = 1.3
+
+    scene = Scene(
+        character=Character(
+            type=CharacterType.avatar,
+            avatar_id="Georgia_expressive_2024112701",
+            avatar_style=AvatarStyle.NORMAL,
+            talking_style=TalkingStyle.EXPRESSIVE,
+            offset=offset,
+            scale=scale,
+        ),
+        voice=Voice(
+            type=VoiceType.TEXT,
+            voice_id="511ffd086a904ef593b608032004112c",
+            input_text=dialogue,
+        ),
+        background=Background(
+            type=BackgroundType.IMAGE,
+            image_asset_id=background_asset_id,
+        ),
+    )
+    request_data = CreateAvatarVideoV2Request(
+        title=f"Positioning, x={offset.x:.2f}, y={offset.y:.2f}, s={scale:.2f}",
+        dimension=Dimension(width=720, height=1280),
+        video_inputs=[scene],
+    )
+    logger.info(f"Requesting video generation: {request_data}")
+    response = client.create_avatar_video_v2(request_data)
+    logger.info(f"Video generation request response: {response}")
+
+    logger.info(f"Deleting asset ID: {background_asset_id}")
+    client.delete_asset(background_asset_id)
 
 
 def main():
@@ -25,6 +83,8 @@ def main():
     print("Check quota:")
     print(client.check_quota())
     print()
+
+    generate_position_test_video(client)
 
     # print("List avatars:")
     # avatars = client.list_avatars()
