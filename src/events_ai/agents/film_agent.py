@@ -43,7 +43,7 @@ class FilmAgent:
 
         # Required for background image to fully load.
         # HeyGen unable to confirm why.
-        time.sleep(30.0)
+        time.sleep(60.0)
 
         scene = Scene(
             character=Character(

@@ -30,6 +30,7 @@ def main_cli():
     parser.add_argument("-e", "--email", type=str)
     parser.add_argument("--working-dir")
     parser.add_argument("--today")
+    parser.add_argument("--all", action="store_true")
 
     args = parser.parse_args()
 
@@ -64,14 +65,20 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
 
     producer = Producer(working_dir, (720, 1280))
 
-    if args.research is not None:
+    # Research
+    do_research = (args.research is not None) or (
+        args.all and not producer.research_done
+    )
+    research_filter = args.research if len(args.research or []) > 0 else None
+
+    if do_research:
         research_config = importlib.resources.files(__name__) / "assets/research.toml"
         all_targets = tomllib.load(research_config.open("rb"))
-        producer.research_events(
-            all_targets, today, args.research if len(args.research) > 0 else None
-        )
+        producer.research_events(all_targets, today, research_filter)
 
-    if args.write is not None:
+    # Write
+    do_script = (args.write is not None) or (args.all and not producer.script_done)
+    if do_script:
         try:
             num_events = int(args.write[0])
         except Exception:
@@ -79,16 +86,25 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
 
         producer.write_script(today, num_events, gen_path_manager.find_recent(today, 3))
 
-    if args.storyboard:
+    # Storyboard
+    do_storyboard = args.storyboard or (args.all and not producer.storyboard_done)
+    if do_storyboard:
         producer.make_storyboard()
 
-    if args.film is not None:
-        producer.film_clips(takes_filter=args.film if len(args.film) > 0 else None)
+    # Film
+    do_film = (args.film is not None) or (args.all and not producer.film_done)
+    film_filter = args.film if len(args.film or []) > 0 else None
+    if do_film:
+        producer.film_clips(takes_filter=film_filter)
 
-    if args.produce:
+    # Produce
+    do_produce = args.produce or (args.all and not producer.produce_done)
+    if do_produce:
         producer.produce_video(today)
 
-    if args.create_post:
+    # Create post
+    do_post = args.create_post or (args.all and not producer.social_media_post_done)
+    if do_post:
         producer.write_social_media_post(today)
 
 

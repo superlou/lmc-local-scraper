@@ -81,6 +81,10 @@ class Producer:
         df.to_csv(events_path, index_label="id")
         logger.info(f"Collected {len(df)} events into {events_path}")
 
+    @property
+    def research_done(self) -> bool:
+        return (self.path / "events.csv").exists()
+
     def write_script(
         self, today: date, num_events: int, recent_working_dirs: list[Path]
     ):
@@ -103,6 +107,10 @@ class Producer:
             script_file.write(script.model_dump_json(indent=4))
 
         logger.info(f"Script written to {script_path}")
+
+    @property
+    def script_done(self) -> bool:
+        return (self.path / "script.json").exists()
 
     def make_storyboard(self):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
@@ -143,6 +151,10 @@ class Producer:
         )
 
         logger.info(f"Created storyboard PDF at {storyboard_path}")
+
+    @property
+    def storyboard_done(self) -> bool:
+        return (self.path / "storyboard.json").exists()
 
     def start_clip_jobs(self, takes: list[Take], path: Path):
         client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
@@ -227,6 +239,13 @@ class Producer:
         self.start_clip_jobs(takes, self.path)
         self.wait_and_download_clip_jobs()
 
+    @property
+    def film_done(self) -> bool:
+        storyboard_path = self.path / "storyboard.json"
+        storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
+        take_paths = [self.path / f"clip_{take.id}.mp4" for take in storyboard.takes]
+        return all(path.exists() for path in take_paths)
+
     def produce_video(self, today: date):
         titler = Titler(ASSETS_DIR / "titles")
 
@@ -301,6 +320,10 @@ class Producer:
         video.write_videofile(output_path, audio_codec="aac")
         logger.info(f"Wrote video to {output_path}")
 
+    @property
+    def produce_done(self) -> bool:
+        return (self.path / "video.mp4").exists()
+
     def write_social_media_post(self, today: date):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
@@ -316,6 +339,10 @@ class Producer:
             post_file.write(post_text)
 
         logger.info(f"Post written to {post_path}")
+
+    @property
+    def social_media_post_done(self) -> bool:
+        return (self.path / "post.txt").exists()
 
 
 class ProducerDimensionsInvalid(Exception):
