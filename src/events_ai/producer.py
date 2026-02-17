@@ -276,9 +276,9 @@ class Producer:
         for take in storyboard.takes[1:-1]:
             clip = VideoFileClip(self.path / f"clip_{take.id}.mp4")
             props = {
-                "name": take.title,
-                "when": take.when,
-                "where": take.where,
+                "name": title_safe(take.title),
+                "when": title_safe(take.when),
+                "where": title_safe(take.where),
                 "duration": clip.duration,
             }
             url = "event_info.html?" + "&".join([f"{k}={v}" for k, v in props.items()])
@@ -395,3 +395,7 @@ def download_file(url: str, filename: str | Path):
 
 def percent_error(actual: float, expected: float) -> float:
     return (actual - expected) / expected * 100.0
+
+
+def title_safe(text: str) -> str:
+    return text.replace("’", "'").replace("“", '"').replace("”", '"')
