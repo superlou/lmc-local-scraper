@@ -2,6 +2,7 @@ import importlib.resources
 import json
 import os
 import time
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
@@ -25,6 +26,7 @@ from .agents.gemini_event_research_agent import EventsResult
 from .agents.heygen_client import HeyGenClient
 from .agents.script_writer_agent import ScriptResult, ScriptWriterAgent
 from .agents.storyboard_agent import StoryboardAgent, StoryboardResult, Take
+from .producer_paths import ProducerPaths
 
 ASSETS_DIR = importlib.resources.files(__name__) / "assets"
 
@@ -33,6 +35,15 @@ class Producer:
     def __init__(self, working_dir: Path, dimensions: tuple[float, float]):
         self.path = working_dir
         self.dimensions = dimensions
+        self.paths = ProducerPaths(
+            self.path,
+            "events.csv",
+            "script.json",
+            "storyboard.json",
+            "storyboard_pdf.json",
+            "video.mp4",
+            "post.txt",
+        )
 
     def research_events(self, targets, today: date, filter: list[str] | None = None):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
@@ -67,23 +78,22 @@ class Producer:
                 logger.info(
                     f"Found {len(df)} events from {target}", tokens=agent.tokens
                 )
-                df.to_csv(self.path / f"events_{target}.csv", index_label="id")
+                df.to_csv(self.paths.events_for(target), index_label="id")
             except Exception as err:
                 logger.warning(f"Exception researching {target}: {err}")
 
-        events_files = self.path.glob("events_*.csv")
+        events_files = self.paths.events_glob()
         df = pd.concat(
             [pd.read_csv(filename, index_col="id") for filename in events_files],
             ignore_index=True,
         )
 
-        events_path = self.path / "events.csv"
-        df.to_csv(events_path, index_label="id")
-        logger.info(f"Collected {len(df)} events into {events_path}")
+        df.to_csv(self.paths.events, index_label="id")
+        logger.info(f"Collected {len(df)} events into {self.paths.events}")
 
     @property
     def research_done(self) -> bool:
-        return (self.path / "events.csv").exists()
+        return self.paths.events.exists()
 
     def write_script(
         self, today: date, num_events: int, recent_working_dirs: list[Path]
@@ -96,28 +106,25 @@ class Producer:
             if (script_path := dir / "script.json").exists()
         ]
 
-        df = pd.read_csv(self.path / "events.csv", index_col="id")
+        df = pd.read_csv(self.paths.events, index_col="id")
         logger.info(f"Loaded {len(df)} events to write script.")
         script_writer = ScriptWriterAgent(df, today, num_events, recent_scripts)
         script = script_writer.run(llm)
 
-        script_path = self.path / "script.json"
-
-        with open(script_path, "w") as script_file:
+        with open(self.paths.script, "w") as script_file:
             script_file.write(script.model_dump_json(indent=4))
 
-        logger.info(f"Script written to {script_path}")
+        logger.info(f"Script written to {self.paths.script}")
 
     @property
     def script_done(self) -> bool:
-        return (self.path / "script.json").exists()
+        return self.paths.script.exists()
 
     def make_storyboard(self):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-        script_path = self.path / "script.json"
-        script = ScriptResult.model_validate_json(open(script_path).read())
-        logger.info(f"Loaded script from {script_path}")
+        script = ScriptResult.model_validate_json(open(self.paths.script).read())
+        logger.info(f"Loaded script from {self.paths.script}")
 
         aspect_ratio = self.dimensions[0] / self.dimensions[1]
 
@@ -136,25 +143,21 @@ class Producer:
         )
         result = storyboard.run(llm)
 
-        storyboard_path = self.path / "storyboard.json"
-
-        with open(storyboard_path, "w") as storyboard_file:
+        with open(self.paths.storyboard, "w") as storyboard_file:
             storyboard_file.write(result.model_dump_json(indent=4))
 
-        logger.info(f"Wrote storyboard to {storyboard_path}")
-
-        storyboard_pdf_path = self.path / "storyboard.pdf"
+        logger.info(f"Wrote storyboard to {self.paths.storyboard}")
 
         storyboard_to_pdf(
-            StoryboardResult.model_validate_json(open(storyboard_path).read()),
-            storyboard_pdf_path,
+            StoryboardResult.model_validate_json(open(self.paths.storyboard).read()),
+            self.paths.storyboard_pdf,
         )
 
-        logger.info(f"Created storyboard PDF at {storyboard_path}")
+        logger.info(f"Created storyboard PDF at {self.paths.storyboard_pdf}")
 
     @property
     def storyboard_done(self) -> bool:
-        return (self.path / "storyboard.json").exists()
+        return self.paths.storyboard.exists()
 
     def start_clip_jobs(self, takes: list[Take], path: Path):
         client = HeyGenClient(os.environ["HEYGEN_API_KEY"])
@@ -221,8 +224,9 @@ class Producer:
                 time.sleep(10)
 
     def film_clips(self, takes_filter: list[int] | None = None):
-        storyboard_path = self.path / "storyboard.json"
-        storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
+        storyboard = StoryboardResult.model_validate_json(
+            open(self.paths.storyboard).read()
+        )
         phonetic_replacer = PhoneticReplacer(
             json.loads((ASSETS_DIR / "heygen_pronunciation.json").read_text())
         )
@@ -241,8 +245,9 @@ class Producer:
 
     @property
     def film_done(self) -> bool:
-        storyboard_path = self.path / "storyboard.json"
-        storyboard = StoryboardResult.model_validate_json(open(storyboard_path).read())
+        storyboard = StoryboardResult.model_validate_json(
+            open(self.paths.storyboard).read()
+        )
         take_paths = [self.path / f"clip_{take.id}.mp4" for take in storyboard.takes]
         return all(path.exists() for path in take_paths)
 
@@ -315,34 +320,30 @@ class Producer:
 
         # Concatenate all titled clips
         video = concatenate_videoclips(clips)
-        output_path = self.path / "video.mp4"
-        logger.info(f"Writing video to {output_path}...")
-        video.write_videofile(output_path, audio_codec="aac")
-        logger.info(f"Wrote video to {output_path}")
+        logger.info(f"Writing video to {self.paths.video}...")
+        video.write_videofile(self.paths.video, audio_codec="aac")
+        logger.info(f"Wrote video to {self.paths.video}")
 
     @property
     def produce_done(self) -> bool:
-        return (self.path / "video.mp4").exists()
+        return self.paths.video.exists()
 
     def write_social_media_post(self, today: date):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-        script_path = self.path / "script.json"
-        script = ScriptResult.model_validate_json(open(script_path).read())
+        script = ScriptResult.model_validate_json(open(self.paths.script).read())
 
         writer = SocialMediaWriterAgent(script, today)
         post_text = writer.run(llm)
 
-        post_path = self.path / "post.txt"
-
-        with open(post_path, "w") as post_file:
+        with open(self.paths.post, "w") as post_file:
             post_file.write(post_text)
 
-        logger.info(f"Post written to {post_path}")
+        logger.info(f"Post written to {self.paths.post}")
 
     @property
     def social_media_post_done(self) -> bool:
-        return (self.path / "post.txt").exists()
+        return self.paths.post.exists()
 
 
 class ProducerDimensionsInvalid(Exception):

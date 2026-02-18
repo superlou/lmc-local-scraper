@@ -11,6 +11,7 @@ from loguru import logger
 import events_ai.check_setup as check_setup
 from events_ai.gen_path_manager import GenPathManager
 from events_ai.mailer import Mailer
+from events_ai.steps.research_step import ResearchStep
 
 from .producer import Producer
 
