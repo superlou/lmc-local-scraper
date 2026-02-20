@@ -11,9 +11,14 @@ from loguru import logger
 import events_ai.check_setup as check_setup
 from events_ai.gen_path_manager import GenPathManager
 from events_ai.mailer import Mailer
-from events_ai.steps.research_step import ResearchStep
-
-from .producer import Producer
+from events_ai.steps import (
+    FilmStep,
+    ProduceStep,
+    ResearchStep,
+    StoryboardStep,
+    WriteScriptStep,
+)
+from events_ai.steps.write_post_step import WritePostStep
 
 load_dotenv()
 
@@ -64,49 +69,59 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
     if not args.skip_check:
         check_setup.check()
 
-    producer = Producer(working_dir, (720, 1280))
+    ASSETS_DIR = importlib.resources.files(__name__) / "assets"
+    events_path = working_dir / "events.csv"
+    script_path = working_dir / "script.json"
+    storyboard_path = working_dir / "storyboard.json"
+    clip_path = working_dir / "clip.mp4"
+    video_path = working_dir / "video.mp4"
+    post_path = working_dir / "post.txt"
 
     # Research
-    do_research = (args.research is not None) or (
-        args.all and not producer.research_done
-    )
+    research = ResearchStep(events_path)
+    do_research = (args.research is not None) or (args.all and not research.done)
     research_filter = args.research if len(args.research or []) > 0 else None
 
     if do_research:
         research_config = importlib.resources.files(__name__) / "assets/research.toml"
         all_targets = tomllib.load(research_config.open("rb"))
-        producer.research_events(all_targets, today, research_filter)
+        research.run(all_targets, today, research_filter)
 
     # Write
-    do_script = (args.write is not None) or (args.all and not producer.script_done)
+    write_script = WriteScriptStep(script_path, events_path)
+    do_script = (args.write is not None) or (args.all and not write_script.done)
     if do_script:
         try:
             num_events = int(args.write[0])
         except Exception:
             num_events = 4
 
-        producer.write_script(today, num_events, gen_path_manager.find_recent(today, 3))
+        write_script.run(today, num_events, gen_path_manager.find_recent(today, 3))
 
     # Storyboard
-    do_storyboard = args.storyboard or (args.all and not producer.storyboard_done)
+    storyboard = StoryboardStep(storyboard_path, script_path, ASSETS_DIR)
+    do_storyboard = args.storyboard or (args.all and not storyboard.done)
     if do_storyboard:
-        producer.make_storyboard()
+        storyboard.run(720, 1280)
 
     # Film
-    do_film = (args.film is not None) or (args.all and not producer.film_done)
+    film = FilmStep(clip_path, storyboard_path, ASSETS_DIR)
+    do_film = (args.film is not None) or (args.all and not film.done)
     film_filter = args.film if len(args.film or []) > 0 else None
     if do_film:
-        producer.film_clips(takes_filter=film_filter)
+        film.run(takes_filter=film_filter, episode=str(today))
 
     # Produce
-    do_produce = args.produce or (args.all and not producer.produce_done)
+    produce = ProduceStep(video_path, storyboard_path, clip_path, ASSETS_DIR)
+    do_produce = args.produce or (args.all and not produce.done)
     if do_produce:
-        producer.produce_video(today)
+        produce.run(today)
 
     # Create post
-    do_post = args.create_post or (args.all and not producer.social_media_post_done)
+    write_post = WritePostStep(post_path, script_path)
+    do_post = args.create_post or (args.all and not write_post.done)
     if do_post:
-        producer.write_social_media_post(today)
+        write_post.run(today)
 
 
 def send_successful_email(destination: str, args, today: date, working_dir: Path):
