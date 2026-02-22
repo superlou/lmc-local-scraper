@@ -30,6 +30,7 @@ class ResearchAgentFactory:
                 events_finish,
                 kwargs.get("url", ""),
                 use_selenium=kwargs.get("use_selenium", False),
+                split_first=kwargs.get("split_first", False),
             )
         else:
             raise ValueError(f"Couldn't create research agent of type '{agent_type}'")

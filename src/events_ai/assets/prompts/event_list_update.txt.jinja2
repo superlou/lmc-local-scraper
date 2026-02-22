@@ -2,6 +2,11 @@ The known information about the event is in the following JSON structure:
 
 {{event}}
 
+If the event only provides a weekday (e.g., Monday), use the following calendar of upcoming weekdays to determine the full date:
+{% for i in range(0, 7) %}
+* {{start_date | date_offset(i) }}: {{start_date | date_offset(i) | date_weekday }}
+{% endfor %}
+
 Given this event information, use the following information from a webpage encoded in Markdown to add details to the event.
 Simplify the description to remove any formatting or newlines.
 

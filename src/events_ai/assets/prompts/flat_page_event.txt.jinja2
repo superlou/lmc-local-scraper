@@ -1,0 +1,24 @@
+Extract information from the following event:
+
+* Info: {{event.info}}
+* Address: {{event.address}}
+
+For these events, identify their name, description, location, and when they occur.
+Simplify the description to remove any formatting or newlines.
+
+For all Events, specify dates and start times in ISO8061 format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS. Include the time if it is defined, otherwise, only provide the date.
+If there is a range of dates, the first date is the most important. However, if there is a rrange of dates with an opening reception, use the opening reception date.
+The current year is {{start_date | date_year}}, which should be assumed for dates if the year is not specified.
+If the event only specifies a weekday (e.g., "...every Monday..."), use the following calendar of upcoming weekdays to determine the full date:
+{% for i in range(0, 8) %}
+* {{start_date | date_offset(i) | date_weekday }}, {{start_date | date_offset(i) }}
+{% endfor %}
+
+The phrase "rotating [weekday]" means that an event occurs every week on that day.
+
+For all Events, if there is enough information to estimate the target age for the Event, provide a list of one or more of the following: kids, teens, or adults.
+Do not include events that have an unknown or unspecified time or location.
+
+The link for the event is {{link}}.
+
+USE ONLY INFORMATION IN THESE INTRUCTIONS AND THE WEBPAGE.

@@ -83,6 +83,8 @@ class EventListAgent(GeminiEventResearchAgent):
             "event_list_update.txt.jinja2",
             event=event.model_dump_json(),
             page=page,
+            start_date=self.events_start,
+            finish_date=self.events_finish,
         )
         response = self.ask_gemini("gemini-2.5-flash-lite", prompt, Event)
         new_event: Event = response.parsed

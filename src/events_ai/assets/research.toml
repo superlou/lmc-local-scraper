@@ -23,6 +23,7 @@ organization = "MADE: My Art and Design"
 agent = "FlatEventPageAgent"
 url = "https://www.marloweales.com/hghg"
 organization = "Marlowe Artisanal Ales"
+split_first = true
 
 [sheldrake]
 agent = "EventListAgent"
@@ -50,6 +51,7 @@ organization = "Town of Mamaroneck"
 agent = "FlatEventPageAgent"
 url = "https://mamaroneckartistsguild.org/"
 organization = "Mamaroneck Artist Guild"
+split_first = true
 
 [lm_little_league]
 agent = "EventListAgent"

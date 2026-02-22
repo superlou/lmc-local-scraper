@@ -1,13 +1,19 @@
 In the following markdown description of a webpage, extract all events from {{start_date}} to {{finish_date}}.
+
 For these events, identify their name, description, location, and when they occur.
 Simplify the description to remove any formatting or newlines.
-For all Events, specify dates in YYYY-MM-DD format.
+
+For all Events, specify dates and start times in ISO8061 format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS. Include the time if it is defined, otherwise, only provide the date.
 The current year is {{start_date | date_year}}, which should be assumed for dates if the year is not specified.
-If event dates are not specified explicitly, use today's date, {{today}}, and the day of the week to estimate the date of the next occurrence.
+If the event only specifies a weekday (e.g., "...takes place every Monday..."), use the following calendar of upcoming weekdays to determine the full date:
+{% for i in range(-1, 14) %}
+* {{start_date | date_offset(i) | date_weekday }}, {{start_date | date_offset(i) }}:
+{% endfor %}
+
 For all Events, if there is enough information to estimate the target age for the Event, provide a list of one or more of the following: kids, teens, or adults.
 Do not include events that have an unknown or unspecified time or location.
 
-USE ONLY INFORMATION IN THE WEBPAGE.
+USE ONLY INFORMATION IN THESE INTRUCTIONS AND THE WEBPAGE.
 
 The link for all events on this page is: {{link}}
 
