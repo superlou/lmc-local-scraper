@@ -15,8 +15,10 @@ from ..agents.gemini_event_research_agent import EventsResult
 
 
 class ResearchStep(PipelineStep):
-    def __init__(self, events_path: Path):
+    def __init__(self, events_path: Path, research_tokens_path: Path):
         self.events_path = events_path
+        self.research_tokens_path = research_tokens_path
+        self.token_tracker = ResearchTokenTracker()
 
     @property
     def done(self) -> bool:
@@ -60,7 +62,10 @@ class ResearchStep(PipelineStep):
                 df = result_to_df(result)
                 df["organization"] = config["organization"]
                 logger.info(
-                    f"Found {len(df)} events from {target}", tokens=agent.tokens
+                    f"Found {len(df)} events from {target}. Tokens used: {agent.tokens}"
+                )
+                self.token_tracker.record(
+                    target, agent.tokens.prompt, agent.tokens.candidates
                 )
                 df.to_csv(self.events_path_for(target), index_label="id")
             except Exception as err:
@@ -74,6 +79,21 @@ class ResearchStep(PipelineStep):
 
         df.to_csv(self.events_path, index_label="id")
         logger.info(f"Collected {len(df)} events into {self.events_path}")
+        self.token_tracker.save(self.research_tokens_path)
+
+
+class ResearchTokenTracker:
+    def __init__(self):
+        self.ledger = []
+
+    def record(self, name: str, prompt: int, candidate: int):
+        self.ledger.append(
+            {"name": name, "prompt_tokens": prompt, "candidate_tokens": candidate}
+        )
+
+    def save(self, path: Path):
+        df = pd.DataFrame(self.ledger)
+        df.to_csv(path, index=False)
 
 
 def result_to_df(result: EventsResult) -> pd.DataFrame:

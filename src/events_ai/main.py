@@ -71,6 +71,7 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
 
     ASSETS_DIR = importlib.resources.files(__name__) / "assets"
     events_path = working_dir / "events.csv"
+    research_tokens_path = working_dir / "research_tokens.csv"
     script_path = working_dir / "script.json"
     storyboard_path = working_dir / "storyboard.json"
     clip_path = working_dir / "clip.mp4"
@@ -78,7 +79,7 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
     post_path = working_dir / "post.txt"
 
     # Research
-    research = ResearchStep(events_path)
+    research = ResearchStep(events_path, research_tokens_path)
     do_research = (args.research is not None) or (args.all and not research.done)
     research_filter = args.research if len(args.research or []) > 0 else None
 

@@ -69,4 +69,5 @@ class ScriptWriterAgent:
 
         parsed: ScriptResult = response.parsed
         logger.debug(f"Script writer result: {parsed}")
+        logger.info(f"Script writer service usage: {response.usage_metadata}")
         return parsed
