@@ -87,6 +87,7 @@ class Character(BaseModel):
     offset: Offset | None = None
     matting: bool = False
     super_resolution: bool | None = None
+    use_avatar_iv_model: bool | None = None
 
 
 class VoiceType(Enum):

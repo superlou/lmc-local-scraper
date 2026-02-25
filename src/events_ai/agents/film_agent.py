@@ -54,6 +54,7 @@ class FilmAgent:
                 talking_style=TalkingStyle.EXPRESSIVE,
                 offset=Offset(x=0.0, y=0.10),
                 scale=1.3,
+                use_avatar_iv_model=False,
             ),
             voice=Voice(
                 type=VoiceType.TEXT,
