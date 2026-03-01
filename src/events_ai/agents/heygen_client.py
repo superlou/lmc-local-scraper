@@ -97,11 +97,11 @@ class VoiceType(Enum):
 
 
 class VoiceEmotion(Enum):
-    EXCITED = "excited"
-    FRIENDLY = "friendly"
-    SERIOUS = "serious"
-    SOOTHING = "soothing"
-    BROADCASTER = "broadcaster"
+    EXCITED = "Excited"
+    FRIENDLY = "Friendly"
+    SERIOUS = "Serious"
+    SOOTHING = "Soothing"
+    BROADCASTER = "Broadcaster"
 
 
 class Voice(BaseModel):
@@ -110,7 +110,7 @@ class Voice(BaseModel):
     input_text: str
     speed: float = 1.0
     pitch: float = 0.0
-    emotion: VoiceEmotion = VoiceEmotion.EXCITED
+    emotion: VoiceEmotion | None = None
     locale: str | None = None
 
 

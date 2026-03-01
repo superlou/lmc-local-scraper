@@ -16,6 +16,7 @@ from .heygen_client import (
     Scene,
     TalkingStyle,
     Voice,
+    VoiceEmotion,
     VoiceType,
 )
 
@@ -60,6 +61,8 @@ class FilmAgent:
                 type=VoiceType.TEXT,
                 voice_id="511ffd086a904ef593b608032004112c",
                 input_text=self.dialogue,
+                emotion=VoiceEmotion.EXCITED,
+                speed=1.0,
             ),
             background=Background(
                 type=BackgroundType.IMAGE,
