@@ -87,5 +87,10 @@ class EventListAgent(GeminiEventResearchAgent):
             finish_date=self.events_finish,
         )
         response = self.ask_gemini("gemini-2.5-flash-lite", prompt, Event)
-        new_event: Event = response.parsed
-        return new_event
+
+        match response.parsed:
+            case Event() as event:
+                return event
+            case _:
+                logger.warning(f"Event was not updated from list: {event.link}")
+                return event

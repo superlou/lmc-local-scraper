@@ -45,7 +45,7 @@ class FilmAgent:
         # Required for background image to fully load.
         # HeyGen unable to confirm why.
         logger.info("Waiting for uploaded asset to be ready.")
-        time.sleep(60.0)
+        time.sleep(90.0)
 
         scene = Scene(
             character=Character(

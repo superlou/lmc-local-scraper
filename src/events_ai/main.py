@@ -97,7 +97,7 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
         except Exception:
             num_events = 4
 
-        write_script.run(today, num_events, gen_path_manager.find_recent(today, 3))
+        write_script.run(today, num_events, gen_path_manager.find_recent(today, 5))
 
     # Storyboard
     storyboard = StoryboardStep(storyboard_path, script_path, ASSETS_DIR)
