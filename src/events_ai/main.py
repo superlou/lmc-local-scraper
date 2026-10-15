@@ -18,6 +18,7 @@ from events_ai.steps import (
     StoryboardStep,
     WriteScriptStep,
 )
+from events_ai.steps.site_db_step import SiteDBStep
 from events_ai.steps.write_post_step import WritePostStep
 
 load_dotenv()
@@ -34,6 +35,7 @@ def main_cli():
     parser.add_argument("-p", "--produce", action="store_true")
     parser.add_argument("-c", "--create-post", action="store_true")
     parser.add_argument("-e", "--email", type=str)
+    parser.add_argument("-t", "--site-db", action="store_true")
     parser.add_argument("--working-dir")
     parser.add_argument("--today")
     parser.add_argument("--all", action="store_true")
@@ -77,6 +79,7 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
     clip_path = working_dir / "clip.mp4"
     video_path = working_dir / "video.mp4"
     post_path = working_dir / "post.txt"
+    site_db_path = working_dir / "site_db.json"
 
     # Research
     research = ResearchStep(events_path, research_tokens_path)
@@ -123,6 +126,12 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
     do_post = args.create_post or (args.all and not write_post.done)
     if do_post:
         write_post.run(today)
+
+    # Build Site DB
+    site_db = SiteDBStep(events_path, site_db_path)
+    do_site_db = args.site_db or (args.all and not site_db.done)
+    if do_site_db:
+        site_db.run(today, 4, gen_path_manager.find_recent(today, 5))
 
 
 def send_successful_email(destination: str, args, today: date, working_dir: Path):
