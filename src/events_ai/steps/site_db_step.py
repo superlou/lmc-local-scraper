@@ -1,12 +1,10 @@
 import base64
 import io
 import os
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
-import boto3
 import pandas as pd
-from cloudflare import Cloudflare
 from google import genai
 from loguru import logger
 from PIL import Image
@@ -207,5 +205,6 @@ class SiteDBFeatureResult(BaseModel):
 
 
 class SiteDB(BaseModel):
+    built_at: datetime | None = datetime.now()
     events: list[SiteDBEvent] = Field(default_factory=list)
     featured: list[FeaturedEvent] = Field(default_factory=list)
