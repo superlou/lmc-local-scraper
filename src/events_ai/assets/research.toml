@@ -1,6 +1,7 @@
 [vom]
 agent = "EventListAgent"
-url = "https://www.villageofmamaroneckny.gov/calendar/upcoming"
+url = "https://www.villageofmamaroneckny.gov/calendar.aspx"
+url_params = "Keywords=&startDate={events_start:%m/%d/%Y}&enddate={events_finish:%m/%d/%Y}&CID=14,23,24&showPastEvents=false"
 organization = "Village of Mamaroneck"
 
 [mamaroneck_library]
