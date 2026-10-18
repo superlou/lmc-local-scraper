@@ -18,11 +18,13 @@ class ReviseJSONAgent:
         events_finish: date,
         json_url: str,
         organization: str,
+        default_link: str,
     ):
         self.events_start = events_start
         self.events_finish = events_finish
         self.json_url = json_url
         self.organization = organization
+        self.default_link = default_link
         self.tokens = TokenCounts()
 
     def run(self) -> EventsResult:
@@ -34,7 +36,7 @@ class ReviseJSONAgent:
                 Event(
                     organization=self.organization,
                     title=item["title"],
-                    link=item.get("url", ""),
+                    link=item.get("url") or self.default_link,
                     description=html.unescape(urllib.parse.unquote(item["desc"])),
                     when=item["start"],
                     location=item["location"],

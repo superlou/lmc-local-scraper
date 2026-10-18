@@ -37,6 +37,7 @@ class ResearchAgentFactory:
                 events_finish,
                 kwargs.get("url", ""),
                 kwargs.get("organization", ""),
+                kwargs.get("default_link", ""),
             )
         else:
             raise ValueError(f"Couldn't create research agent of type '{agent_type}'")

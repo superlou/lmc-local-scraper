@@ -35,6 +35,7 @@ organization = "Sheldrake Environmental Center"
 agent = "ReviseJSONAgent"
 url = "https://larchmontny.gov/_assets_/plugins/revizeCalendar/calendar_data_handler.php?webspace=larchmont&relative_revize_url=//cms2.revize.com&protocol=https:"
 organization = "Village of Larchmont"
+default_link = "https://www.larchmontny.gov/calendar.php"
 
 [larchmont_library]
 agent = "EventListAgent"
