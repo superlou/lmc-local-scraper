@@ -94,3 +94,8 @@ agent = "EventListAgent"
 url = "https://www.schoolofrock.com/locations/mamaroneck/events"
 organization = "School of Rock Mamaroneck"
 use_selenium = true
+
+[marine_education_center]
+agent = "FlatEventPageAgent"
+url = "https://www.marineeducationcenter.org/programsevents.html"
+organization = "Marine Education Center"
