@@ -31,11 +31,10 @@ agent = "EventListAgent"
 url = "https://sheldrakecenter.org/upcoming-events/"
 organization = "Sheldrake Environmental Center"
 
-# [vol] Broken
-# agent = "EventListAgent"
-# url = "https://larchmontny.gov/calendar.php?view=list"
-# organization = "Village of Larchmont"
-# use_selenium = true
+[vol]
+agent = "ReviseJSONAgent"
+url = "https://larchmontny.gov/_assets_/plugins/revizeCalendar/calendar_data_handler.php?webspace=larchmont&relative_revize_url=//cms2.revize.com&protocol=https:"
+organization = "Village of Larchmont"
 
 [larchmont_library]
 agent = "EventListAgent"
