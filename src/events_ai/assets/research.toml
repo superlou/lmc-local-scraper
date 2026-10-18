@@ -99,3 +99,8 @@ use_selenium = true
 agent = "FlatEventPageAgent"
 url = "https://www.marineeducationcenter.org/programsevents.html"
 organization = "Marine Education Center"
+
+[weinberg_nature]
+agent = "FlatEventPageAgent"
+url = "https://www.weinbergnaturecenter.org/upcoming-events"
+organization = "Weinberg Nature Center"

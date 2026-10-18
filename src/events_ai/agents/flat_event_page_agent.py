@@ -54,7 +54,7 @@ class FlatEventPageAgent(GeminiEventResearchAgent):
             start_date=self.events_start,
             finish_date=self.events_finish,
         )
-        response = self.ask_gemini("gemini-2.5-flash-lite", prompt, EventsResult)
+        response = self.ask_gemini("gemini-2.5-flash", prompt, EventsResult)
 
         if response is None:
             logger.warn(f"Failed to get events from {self.start_url}")
