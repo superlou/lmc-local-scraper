@@ -141,42 +141,6 @@ class SiteDBStep(PipelineStep):
             # todo Handle errors and retry
             return
 
-            candidates = response.candidates or []
-
-            if len(candidates) < 1:
-                logger.warning(
-                    f"Image generation had no candidates. Waiting. Retries left: {retries}"
-                )
-
-                if retries > 0:
-                    retries -= 1
-                    time.sleep(5)
-                    continue
-                else:
-                    raise StoryboardImageGenerationError()
-
-            candidate = candidates[0]
-            if candidate.finish_reason == FinishReason.NO_IMAGE:
-                logger.warning(
-                    f"Image generation had no image. Waiting. Retries left: {retries}"
-                )
-
-                if retries > 0:
-                    retries -= 1
-                    time.sleep(5)
-                    continue
-                else:
-                    raise StoryboardImageGenerationError()
-
-            done = True
-
-        for part in candidate.content.parts:
-            if part.text is not None:
-                logger.info("Got text: " + part.text)
-            elif part.inline_data is not None:
-                image = Image.open(BytesIO(part.inline_data.data))
-                image.save(frame_path)
-
 
 class SiteDBEvent(BaseModel):
     id: int
