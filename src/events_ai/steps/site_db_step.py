@@ -1,6 +1,8 @@
 import base64
 import io
+import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime
 from pathlib import Path
 
@@ -30,7 +32,22 @@ class SiteDBStep(PipelineStep):
         llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
         df = pd.read_csv(self.events_path, index_col="id")
 
-        # todo Use recent featured events
+        recent_featured_events = []
+        for recent_dir in recent_working_dirs:
+            try:
+                recent_site_db_file = open(recent_dir / "site_db.json")
+                recent_site_db = json.load(recent_site_db_file)
+                recent_featureds = recent_site_db["featured"]
+                for recent_featured in recent_featureds:
+                    recent_featured_id = recent_featured["id"]
+                    recent_featured_event = next(
+                        e
+                        for e in recent_site_db["events"]
+                        if e["id"] == recent_featured_id
+                    )
+                    recent_featured_events.append(recent_featured_event)
+            except Exception:
+                logger.warning(f"Unable to open recent events for {recent_dir}")
 
         logger.info(f"Starting to build Site DB from {len(df)} events")
 
@@ -57,12 +74,12 @@ class SiteDBStep(PipelineStep):
                 site_db.events = site_db_events_result.events
 
         # Choose featured events
-        logger.info("Choosing events to feature.")
-
         prompt = build_prompt(
             "site_db_feature.txt.jinja2",
             csv=df.to_csv(),
+            recently_featured=recent_featured_events,
         )
+        logger.info(f"Choosing events to feature. Prompt: {prompt}")
 
         response = chat.send_message(
             message=prompt,
@@ -77,24 +94,13 @@ class SiteDBStep(PipelineStep):
             case SiteDBFeatureResult() as site_db_feature_result:
                 site_db.featured = site_db_feature_result.featured_events
 
-        # Generate images
-        for featured_event in site_db.featured:
-            frame_path = (
-                self.events_path.parent / f"site_db_featured_{featured_event.id}.jpg"
-            )
-            logger.info(
-                f"Generating background for featured event {featured_event.id}, {featured_event.background_desc}: {frame_path}"
-            )
-            self.generate_bg(llm, featured_event.background_desc, frame_path)
+        # Generate background images
+        def image_worker(featured_event: "FeaturedEvent"):
+            llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+            self.generate_background_image(featured_event, llm)
 
-            with Image.open(frame_path) as img:
-                img.save(frame_path, "JPEG", optimize=True, quality=65)
-
-            with Image.open(frame_path) as img:
-                buffer = io.BytesIO()
-                img.save(buffer, format="JPEG")
-                b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-                featured_event.background_b64 = f"data:image/jpeg;base64,{b64}"
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            executor.map(image_worker, site_db.featured)
 
         # Save results
         with open(self.site_db_path, "w") as site_db_file:
@@ -109,18 +115,38 @@ class SiteDBStep(PipelineStep):
         aws.upload_to_s3(self.site_db_path, bucket, dest)
         logger.info(f"Uploaded {self.site_db_path} to bucket {bucket}, {dest}")
 
-    def generate_bg(
+    def generate_background_image(
+        self, featured_event: "FeaturedEvent", llm: genai.Client
+    ):
+        image_path = (
+            self.events_path.parent / f"site_db_featured_{featured_event.id}.jpg"
+        )
+        logger.info(
+            f"Generating background for featured event {featured_event.id}, {featured_event.background_desc}: {image_path}"
+        )
+        prompt = build_prompt(
+            "site_db_feature_background.txt.jinja2",
+            background_description=featured_event.background_desc,
+        )
+        self.generate_image(llm, prompt, image_path)
+
+        # Compress
+        with Image.open(image_path) as img:
+            img.save(image_path, "JPEG", optimize=True, quality=50)
+
+        with Image.open(image_path) as img:
+            buffer = io.BytesIO()
+            img.save(buffer, format="JPEG")
+            b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+            featured_event.background_b64 = f"data:image/jpeg;base64,{b64}"
+
+    def generate_image(
         self,
         llm: genai.Client,
-        background_desc: str,
+        prompt: str,
         frame_path: Path,
         retries: int = 5,
     ):
-        prompt = build_prompt(
-            "site_db_feature_background.txt.jinja2",
-            background_description=background_desc,
-        )
-
         done = False
 
         while not done and retries > 0:
