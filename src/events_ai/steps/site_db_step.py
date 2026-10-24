@@ -52,10 +52,7 @@ class SiteDBStep(PipelineStep):
         logger.info(f"Starting to build Site DB from {len(df)} events")
 
         # Standardize and analyze all events
-        prompt = build_prompt(
-            "site_db.txt.jinja2",
-            csv=df.to_csv(),
-        )
+        prompt = build_prompt("site_db.txt.jinja2", csv=df.to_csv(), today=today)
 
         site_db = SiteDB()
         chat = llm.chats.create(model="gemini-2.5-flash")
@@ -78,6 +75,7 @@ class SiteDBStep(PipelineStep):
             "site_db_feature.txt.jinja2",
             csv=df.to_csv(),
             recently_featured=recent_featured_events,
+            today=today,
         )
         logger.info(f"Choosing events to feature. Prompt: {prompt}")
 

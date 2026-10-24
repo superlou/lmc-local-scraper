@@ -1,5 +1,7 @@
 From that list of events, specify the IDs of the most interesting 3 events. Try to spread them around the communities and organizations. Specify why you chose these events to feature. Include the community and organization if it influenced your choice.
 
+DO NOT FEATURE EVENTS THAT OCCUR PRIOR TO {{today}}.
+
 {% if recently_featured | length > 0 %}
 The following events were already featured recently. Do not feature them again:
 {% for event in recently_featured %}
@@ -7,6 +9,6 @@ The following events were already featured recently. Do not feature them again:
 {% endfor %}
 {% endif %}
 
-In the "background_desc" field, describe a background image that is relevant, but not too specific. This background image will be used behind the title text and other information when featuring this image. Avoid pictures of people or text. Prefer images that represent the description, but not a literal recreation.
+In the "background_desc" field, describe a background image that is relevant, but not too specific. This background image will be used behind the title text and other information when featuring this image. Avoid pictures of people or text. Prefer images that represent the description, but not a literal recreation. Prefer abstract images. Do not use photorealistic images.
 
 Leave the "background_b64" field blank.
