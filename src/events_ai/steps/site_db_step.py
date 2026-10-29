@@ -1,19 +1,18 @@
-import base64
-import io
 import json
-import os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime
 from pathlib import Path
 
 import pandas as pd
-from google import genai
 from loguru import logger
-from PIL import Image
 from pydantic import BaseModel, Field
 
+from events_ai import image_tools
 from events_ai.agents.prompt import build_prompt
 from events_ai.aws import AWS
+from events_ai.services.gemini_chat_service import GeminiChatService
+from events_ai.services.gemini_image_service import GeminiImageService
+from events_ai.services.service import ServiceUse
 from events_ai.steps.pipeline_step import PipelineStep
 
 
@@ -29,7 +28,6 @@ class SiteDBStep(PipelineStep):
     def run(
         self, today: date, num_featured_events: int, recent_working_dirs: list[Path]
     ):
-        llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
         df = pd.read_csv(self.events_path, index_col="id")
 
         recent_featured_events = []
@@ -51,54 +49,28 @@ class SiteDBStep(PipelineStep):
 
         logger.info(f"Starting to build Site DB from {len(df)} events")
 
+        site_db = SiteDB()
+        chat = GeminiChatService("gemini-2.5-flash")
+
         # Standardize and analyze all events
         prompt = build_prompt("site_db.txt.jinja2", csv=df.to_csv(), today=today)
-
-        site_db = SiteDB()
-        chat = llm.chats.create(model="gemini-2.5-flash")
-
-        response = chat.send_message(
-            message=prompt,
-            config=genai.types.GenerateContentConfig(
-                thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
-                response_mime_type="application/json",
-                response_schema=SiteDBEventsResult,
-            ),
-        )
-
-        match response.parsed:
-            case SiteDBEventsResult() as site_db_events_result:
-                site_db.events = site_db_events_result.events
+        result = chat.message(prompt, SiteDBEventsResult)
+        site_db.events = result.events
 
         # Choose featured events
         prompt = build_prompt(
             "site_db_feature.txt.jinja2",
-            csv=df.to_csv(),
+            num_to_feature=1,  # num_featured_events,
             recently_featured=recent_featured_events,
             today=today,
         )
         logger.info(f"Choosing events to feature. Prompt: {prompt}")
-
-        response = chat.send_message(
-            message=prompt,
-            config=genai.types.GenerateContentConfig(
-                thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
-                response_mime_type="application/json",
-                response_schema=SiteDBFeatureResult,
-            ),
-        )
-
-        match response.parsed:
-            case SiteDBFeatureResult() as site_db_feature_result:
-                site_db.featured = site_db_feature_result.featured_events
+        result = chat.message(prompt, SiteDBFeatureResult)
+        site_db.featured = result.featured_events
 
         # Generate background images
-        def image_worker(featured_event: "FeaturedEvent"):
-            llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-            self.generate_background_image(featured_event, llm)
-
         with ThreadPoolExecutor(max_workers=3) as executor:
-            executor.map(image_worker, site_db.featured)
+            executor.map(self.generate_background_image, site_db.featured)
 
         # Save results
         with open(self.site_db_path, "w") as site_db_file:
@@ -107,63 +79,25 @@ class SiteDBStep(PipelineStep):
         logger.info(f"Site DB written to {self.site_db_path}")
 
         # Upload to AWS
-        aws = AWS()
         bucket = "lmc-local-events-data"
         dest = "public/data.json"
-        aws.upload_to_s3(self.site_db_path, bucket, dest)
+        AWS().upload_to_s3(self.site_db_path, bucket, dest)
         logger.info(f"Uploaded {self.site_db_path} to bucket {bucket}, {dest}")
 
-    def generate_background_image(
-        self, featured_event: "FeaturedEvent", llm: genai.Client
-    ):
-        image_path = (
-            self.events_path.parent / f"site_db_featured_{featured_event.id}.jpg"
-        )
+    def generate_background_image(self, featured_event: "FeaturedEvent"):
+        id = featured_event.id
+        image_path = self.events_path.parent / f"site_db_featured_{id}.jpg"
         logger.info(
-            f"Generating background for featured event {featured_event.id}, {featured_event.background_desc}: {image_path}"
+            f"Generating background for featured event {id}, {featured_event.background_desc}: {image_path}"
         )
         prompt = build_prompt(
             "site_db_feature_background.txt.jinja2",
             background_description=featured_event.background_desc,
         )
-        self.generate_image(llm, prompt, image_path)
 
-        # Compress
-        with Image.open(image_path) as img:
-            img.save(image_path, "JPEG", optimize=True, quality=50)
-
-        with Image.open(image_path) as img:
-            buffer = io.BytesIO()
-            img.save(buffer, format="JPEG")
-            b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-            featured_event.background_b64 = f"data:image/jpeg;base64,{b64}"
-
-    def generate_image(
-        self,
-        llm: genai.Client,
-        prompt: str,
-        frame_path: Path,
-        retries: int = 5,
-    ):
-        done = False
-
-        while not done and retries > 0:
-            interaction = llm.interactions.create(
-                model="gemini-nano-banana-2.1",
-                input=prompt,
-                response_format={
-                    "type": "image",
-                    "mime_type": "image/jpeg",
-                    "aspect_ratio": "16:9",
-                    "image_size": "1K",
-                },
-            )
-
-            with open(frame_path, "wb") as f:
-                f.write(base64.b64decode(interaction.output_image.data))
-
-            # todo Handle errors and retry
-            return
+        GeminiImageService().generate(prompt, image_path)
+        image_tools.compress(image_path, 50)
+        featured_event.background_b64 = image_tools.to_b64_url(image_path)
 
 
 class SiteDBEvent(BaseModel):
