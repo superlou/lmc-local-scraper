@@ -3,21 +3,33 @@ from bs4 import BeautifulSoup
 from loguru import logger
 from markdownify import markdownify
 from selenium import webdriver
+from selenium.webdriver import ChromeOptions
+
+options = ChromeOptions()
+options.add_argument("--headless=new")
+probe = webdriver.Chrome(options=options)
+USER_AGENT = probe.execute_script("return navigator.userAgent").replace(
+    "HeadlessChrome", "Chrome"
+)
+probe.quit()
 
 
 def get(url: str, use_selenium=False) -> str:
     if use_selenium:
-        driver = webdriver.Chrome()
+        options = ChromeOptions()
+        options.add_argument("--headless=new")
+        options.add_argument(f"user-agent={USER_AGENT}")
+        options.add_argument("--window-size=1920,1080")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
+        driver = webdriver.Chrome(options=options)
         driver.get(url)
-        driver.implicitly_wait(1.0)
+        driver.implicitly_wait(2.0)
         html = driver.page_source
+        driver.quit()
     else:
-        response = requests.get(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
-            },
-        )
+        response = requests.get(url, headers={"User-Agent": USER_AGENT})
         html = response.text
 
     soup = BeautifulSoup(html, "html.parser")
