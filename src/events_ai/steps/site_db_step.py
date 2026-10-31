@@ -60,7 +60,7 @@ class SiteDBStep(PipelineStep):
         # Choose featured events
         prompt = build_prompt(
             "site_db_feature.txt.jinja2",
-            num_to_feature=1,  # num_featured_events,
+            num_to_feature=num_featured_events,
             recently_featured=recent_featured_events,
             today=today,
         )
