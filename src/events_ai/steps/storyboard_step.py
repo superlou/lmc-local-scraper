@@ -1,5 +1,5 @@
 import os
-from importlib.abc import Traversable
+from importlib.resources.abc import Traversable
 from pathlib import Path
 
 from fpdf import FPDF

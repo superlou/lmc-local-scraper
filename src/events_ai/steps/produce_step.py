@@ -1,5 +1,5 @@
 from datetime import date
-from importlib.abc import Traversable
+from importlib.resources.abc import Traversable
 from pathlib import Path
 
 from htmlcorder.titler import Titler

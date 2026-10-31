@@ -1,7 +1,7 @@
 import json
 import os
 import time
-from importlib.abc import Traversable
+from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Generator
 
