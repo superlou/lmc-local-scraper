@@ -1,0 +1,38 @@
+<html>
+<body>
+    {% if overview.exception %}
+        </p>AI events bot failed to generate.</p>
+    {% else %}
+        <p>AI events bot finished successfully.</p>
+    {% endif %}
+
+    <p><b>Started at:</b> {{overview.started_at}}</p>
+    <p><b>Finished at:</b> {{overview.finished_at}}</p>
+    <p><b>Run arguments:</b> {{overview.args}}</p>
+    <p><b>Working directory:</b> {{overview.working_dir}}</p>
+    <p><b>Today:</b> {{overview.today}}</p>
+    <p><b>Exception:</b> {{overview.exception}}</p>
+
+    {% set steps = ["check", "research", "script", "storyboard", "film", "produce", "create_post", "site_db"] %}
+
+    <table>
+        <tr>
+            <th>Step</th>
+            <th>Status</th>
+        </tr>
+        {% for step in steps %}
+            <tr>
+                <td>{{step}}</td>
+                <td>{{overview["do_" + step].value}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {% if overview.traceback %}
+        <p><b>Traceback:</b></p>
+        <pre style="font-family: monospace;">
+            {{overview.traceback | e}}
+        </pre>
+    {% endif %}
+</body>
+</html>

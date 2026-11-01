@@ -1,8 +1,8 @@
 import argparse
 import importlib.resources
-import os
 import tomllib
-from datetime import date
+import traceback
+from datetime import date, datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -10,7 +10,7 @@ from loguru import logger
 
 import events_ai.check_setup as check_setup
 from events_ai.gen_path_manager import GenPathManager
-from events_ai.mailer import Mailer
+from events_ai.overview import Overview, StepStatus, send_overview_email
 from events_ai.steps import (
     FilmStep,
     ProduceStep,
@@ -57,19 +57,31 @@ def main_cli():
     logger.info(f"Today is {today.strftime('%Y-%m-%d')}")
     logger.info(f"Working in {working_dir}")
 
+    overview = Overview(working_dir=working_dir, today=today, args=args)
+
     try:
-        generate(working_dir, today, gen_path_manager, args)
-        if args.email:
-            send_successful_email(args.email, args, today, working_dir)
+        generate(working_dir, today, gen_path_manager, args, overview)
     except Exception as e:
-        if args.email:
-            send_failure_email(args.email, args, today, working_dir)
+        overview.exception = e
+        overview.traceback = traceback.format_exc()
         raise (e)
+    finally:
+        overview.finished_at = datetime.now()
+        if args.email:
+            send_overview_email(args.email, args, today, working_dir, overview)
 
 
-def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, args):
+def generate(
+    working_dir: Path,
+    today: date,
+    gen_path_manager: GenPathManager,
+    args,
+    overview: Overview,
+):
     if not args.skip_check:
+        overview.do_check = StepStatus.INCOMPLETE
         check_setup.check()
+        overview.do_check = StepStatus.DONE
 
     ASSETS_DIR = importlib.resources.files(__name__) / "assets"
     events_path = working_dir / "events.csv"
@@ -87,83 +99,62 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
     research_filter = args.research if len(args.research or []) > 0 else None
 
     if do_research:
+        overview.do_research = StepStatus.INCOMPLETE
         research_config = importlib.resources.files(__name__) / "assets/research.toml"
         all_targets = tomllib.load(research_config.open("rb"))
         research.run(all_targets, today, research_filter)
+        overview.do_research = StepStatus.DONE
 
     # Write
     write_script = WriteScriptStep(script_path, events_path)
     do_script = (args.write is not None) or (args.all and not write_script.done)
     if do_script:
+        overview.do_script = StepStatus.INCOMPLETE
         try:
             num_events = int(args.write[0])
         except Exception:
             num_events = 4
 
         write_script.run(today, num_events, gen_path_manager.find_recent(today, 5))
+        overview.do_script = StepStatus.DONE
 
     # Storyboard
     storyboard = StoryboardStep(storyboard_path, script_path, ASSETS_DIR)
     do_storyboard = args.storyboard or (args.all and not storyboard.done)
     if do_storyboard:
+        overview.do_storyboard = StepStatus.INCOMPLETE
         storyboard.run(720, 1280)
+        overview.do_storyboard = StepStatus.DONE
 
     # Film
     film = FilmStep(clip_path, storyboard_path, ASSETS_DIR)
     do_film = (args.film is not None) or (args.all and not film.done)
     film_filter = args.film if len(args.film or []) > 0 else None
     if do_film:
+        overview.do_film = StepStatus.INCOMPLETE
         film.run(takes_filter=film_filter, episode=str(today))
+        overview.do_film = StepStatus.DONE
 
     # Produce
     produce = ProduceStep(video_path, storyboard_path, clip_path, ASSETS_DIR)
     do_produce = args.produce or (args.all and not produce.done)
     if do_produce:
+        overview.do_produce = StepStatus.INCOMPLETE
         produce.run(today)
+        overview.do_produce = StepStatus.DONE
 
     # Create post
     write_post = WritePostStep(post_path, script_path)
     do_post = args.create_post or (args.all and not write_post.done)
     if do_post:
+        overview.do_create_post = StepStatus.INCOMPLETE
         write_post.run(today)
+        overview.do_create_post = StepStatus.DONE
 
     # Build Site DB
     site_db = SiteDBStep(events_path, site_db_path)
     do_site_db = args.site_db or (args.all and not site_db.done)
     if do_site_db:
+        overview.do_site_db = StepStatus.INCOMPLETE
         site_db.run(today, 3, gen_path_manager.find_recent(today, 5))
-
-
-def send_successful_email(destination: str, args, today: date, working_dir: Path):
-    mailer = Mailer("gen-ai-bot@lmc-tv.org", os.environ["GMAIL_USER_APP_PASSWORD"])
-    mailer.subject = f"AI events bot finished - {working_dir}"
-    mailer.body = "AI events bot finished successfully."
-    mailer.body += f"\nargs = {args}"
-    mailer.attach(open(working_dir / "log.txt"), f"log_{today}.txt")
-    mailer.attach(open(working_dir / "events.csv"), f"events_{today}.csv")
-    mailer.attach(open(working_dir / "script.json"), f"script_{today}.json")
-    mailer.attach(open(working_dir / "storyboard.json"), f"storyboard_{today}.json")
-    mailer.attach(open(working_dir / "video.mp4", "rb"), f"video_{today}.mp4")
-    mailer.attach(open(working_dir / "post.txt"), f"post_{today}.txt")
-    mailer.send(destination)
-
-
-def try_to_attach(mailer: Mailer, file_path: Path, filename: str, mode: str = "r"):
-    try:
-        mailer.attach(open(file_path, mode), filename)
-    except FileNotFoundError:
-        logger.warning(f"Failed to find file to attach as {filename}")
-
-
-def send_failure_email(destination: str, args, today: date, working_dir: Path):
-    mailer = Mailer("gen-ai-bot@lmc-tv.org", os.environ["GMAIL_USER_APP_PASSWORD"])
-    mailer.subject = f"AI events bot failed! - {working_dir}"
-    mailer.body = "AI events bot failed to generate."
-    mailer.body += f"\nargs = {args}"
-    try_to_attach(mailer, working_dir / "log.txt", f"log_{today}.txt")
-    try_to_attach(mailer, working_dir / "events.csv", f"events_{today}.csv")
-    try_to_attach(mailer, working_dir / "script.json", f"script_{today}.json")
-    try_to_attach(mailer, working_dir / "storyboard.json", f"storyboard_{today}.json")
-    try_to_attach(mailer, working_dir / "video.mp4", f"video_{today}.mp4", "rb")
-    try_to_attach(mailer, working_dir / "post.txt", f"post_{today}.txt")
-    mailer.send(destination)
+        overview.do_site_db = StepStatus.DONE

@@ -4,7 +4,6 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from io import StringIO
-from pathlib import Path
 from typing import IO
 
 from loguru import logger
@@ -25,11 +24,11 @@ class Mailer:
         self.attachments.append((data, attachment_name))
 
     def send(self, to: str):
-        message = MIMEMultipart()
+        message = MIMEMultipart("alternative")
         message["From"] = self.sender_email
         message["To"] = to
         message["Subject"] = self.subject
-        message.attach(MIMEText(self.body, "plain"))
+        message.attach(MIMEText(self.body, "html"))
 
         for data, name in self.attachments:
             message.attach(MIMEApplication(data.read(), Name=name))
