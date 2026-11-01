@@ -131,7 +131,7 @@ def generate(working_dir: Path, today: date, gen_path_manager: GenPathManager, a
     site_db = SiteDBStep(events_path, site_db_path)
     do_site_db = args.site_db or (args.all and not site_db.done)
     if do_site_db:
-        site_db.run(today, 4, gen_path_manager.find_recent(today, 5))
+        site_db.run(today, 3, gen_path_manager.find_recent(today, 5))
 
 
 def send_successful_email(destination: str, args, today: date, working_dir: Path):

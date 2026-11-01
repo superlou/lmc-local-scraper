@@ -12,7 +12,6 @@ from events_ai.agents.prompt import build_prompt
 from events_ai.aws import AWS
 from events_ai.services.gemini_chat_service import GeminiChatService
 from events_ai.services.gemini_image_service import GeminiImageService
-from events_ai.services.service import ServiceUse
 from events_ai.steps.pipeline_step import PipelineStep
 
 
