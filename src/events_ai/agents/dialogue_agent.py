@@ -2,6 +2,7 @@ import wave
 
 from google import genai
 from google.genai.types import PrebuiltVoiceConfig, SpeechConfig, VoiceConfig
+from events_ai.token_usage import record_gemini_usage
 
 
 class GeminiSpeechClient:
@@ -19,6 +20,10 @@ class GeminiSpeechClient:
         )
         response = self.client.models.generate_content(
             model="gemini-2.5-flash-preview-tts", contents=dialogue, config=config
+        )
+
+        record_gemini_usage(
+            "dialogue audio", "gemini-2.5-flash-preview-tts", response.usage_metadata
         )
 
         pcm_data = response.candidates[0].content.parts[0].inline_data.data

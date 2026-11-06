@@ -6,12 +6,16 @@ from loguru import logger
 from pydantic import BaseModel
 
 from .service import Service, ServiceGenerationFailed, ServiceUse
+from events_ai.token_usage import record_gemini_usage
 
 
 class GeminiChatService(Service):
-    def __init__(self, model: str, thinking_budget: int = 0):
+    def __init__(
+        self, model: str, thinking_budget: int = 0, stage: str = "Gemini chat"
+    ):
         super().__init__()
         self.model = model
+        self.stage = stage
         self.thinking_budget = 0
         self.llm = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
         # self.chat = self.llm.chats.create(model=model)
@@ -30,17 +34,19 @@ class GeminiChatService(Service):
             },
         )
 
+        usage = getattr(interaction, "usage", None)
+        if usage is not None:
+            record_gemini_usage(self.stage, self.model, usage)
+            use = GeminiServiceUse(self.model, usage)
+            logger.info(use.log_msg)
+            self.usages.append(use)
+
         if not isinstance(interaction, Interaction):
             raise ServiceGenerationFailed()
         elif interaction.output_text is None:
             raise ServiceGenerationFailed()
 
         self.previous_interaction_id = interaction.id
-
-        if interaction.usage is not None:
-            use = GeminiServiceUse(self.model, interaction.usage)
-            logger.info(use.log_msg)
-            self.usages.append(use)
 
         return response_type.model_validate_json(interaction.output_text)
 

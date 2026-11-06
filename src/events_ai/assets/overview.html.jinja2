@@ -13,6 +13,48 @@
     <p><b>Today:</b> {{overview.today}}</p>
     <p><b>Exception:</b> {{overview.exception}}</p>
 
+    <h3>Gemini token usage for this loadup</h3>
+    <p><b>Reported total:</b> {{overview.token_usage_total}} tokens</p>
+    {% if overview.email_report_note %}<p>{{overview.email_report_note}}</p>{% endif %}
+    <p>Counts use the usage metadata returned by Gemini across the run. Checkpoint-reused event batches use 0 new tokens in this loadup.</p>
+    <table>
+        <tr><th>Stage</th><th>Input</th><th>Cached input</th><th>Output</th><th>Total</th></tr>
+        {% for usage in overview.token_usage %}
+            <tr>
+                <td>{{usage.stage}}</td><td>{{usage.input_tokens}}</td>
+                <td>{{usage.cached_input_tokens}}</td><td>{{usage.output_tokens}}</td>
+                <td>{{usage.total_tokens}}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5">No tracked Gemini calls in this loadup.</td></tr>
+        {% endfor %}
+    </table>
+
+    <h3>Events omitted from the website database</h3>
+    {% if not overview.event_omissions_assessed %}
+        <p>Omitted events were not assessed for this loadup.</p>
+    {% elif overview.omitted_events %}
+        <ul>
+        {% for event in overview.omitted_events %}
+            <li>ID {{event.id}} — {{event.title | e}}: {{event.reason | e}}</li>
+        {% endfor %}
+        </ul>
+    {% elif overview.event_omissions_assessed %}
+        <p>No events were recorded as omitted.</p>
+    {% endif %}
+
+    {% if overview.location_review_events %}
+        <h3>Location review only (events were not omitted)</h3>
+        <ul>
+        {% for event in overview.location_review_events %}
+            <li>
+                ID {{event.id}} — {{event.title | e}} ({{event.location | e}}):
+                {{event.reason | e}}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
     {% set steps = ["check", "research", "script", "storyboard", "film", "produce", "create_post", "site_db"] %}
 
     <table>

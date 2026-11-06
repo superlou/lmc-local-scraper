@@ -4,6 +4,7 @@ from pathlib import Path
 
 from google import genai
 from google.genai.types import FinishReason
+from events_ai.token_usage import record_gemini_usage
 from loguru import logger
 from PIL import Image
 from pydantic import BaseModel
@@ -110,6 +111,7 @@ class StoryboardAgent:
                     ),
                 ),
             )
+            record_gemini_usage("storyboard image", "gemini-2.5-flash-image", response.usage_metadata)
 
             candidates = response.candidates or []
 
@@ -160,6 +162,7 @@ class StoryboardAgent:
                 image_config=genai.types.ImageConfig(aspect_ratio=self.aspect_ratio),
             ),
         )
+        record_gemini_usage("storyboard base image", "gemini-2.5-flash-image", response.usage_metadata)
 
         for part in response.candidates[0].content.parts:
             if part.text is not None:

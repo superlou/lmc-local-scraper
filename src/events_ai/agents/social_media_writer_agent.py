@@ -2,6 +2,7 @@ from datetime import date
 
 from google import genai
 from loguru import logger
+from events_ai.token_usage import record_gemini_usage
 
 from events_ai.agents.prompt import build_prompt
 from events_ai.agents.script_writer_agent import ScriptResult
@@ -26,6 +27,8 @@ class SocialMediaWriterAgent:
                 thinking_config=genai.types.ThinkingConfig(thinking_budget=0),
             ),
         )
+
+        record_gemini_usage("social post writing", "gemini-2.5-flash", response.usage_metadata)
 
         text = response.text
         logger.debug(f"Social media writer result: {text}")

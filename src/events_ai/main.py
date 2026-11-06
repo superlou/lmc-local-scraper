@@ -1,5 +1,6 @@
 import argparse
 import importlib.resources
+import os
 import tomllib
 import traceback
 from datetime import date, datetime
@@ -56,6 +57,10 @@ def main_cli():
     logger.add(working_dir / "log.txt")
     logger.info(f"Today is {today.strftime('%Y-%m-%d')}")
     logger.info(f"Working in {working_dir}")
+
+    token_usage_path = working_dir / "gemini_token_usage.jsonl"
+    token_usage_path.unlink(missing_ok=True)
+    os.environ["LMC_RUN_TOKEN_USAGE_PATH"] = str(token_usage_path)
 
     overview = Overview(working_dir=working_dir, today=today, args=args)
 
@@ -156,5 +161,6 @@ def generate(
     do_site_db = args.site_db or (args.all and not site_db.done)
     if do_site_db:
         overview.do_site_db = StepStatus.INCOMPLETE
+        (working_dir / "site_db_run_report.json").unlink(missing_ok=True)
         site_db.run(today, 3, gen_path_manager.find_recent(today, 5))
         overview.do_site_db = StepStatus.DONE

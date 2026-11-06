@@ -2,6 +2,7 @@ from datetime import date
 
 import pandas as pd
 from google import genai
+from events_ai.token_usage import record_gemini_usage
 from loguru import logger
 from pydantic import BaseModel
 
@@ -66,6 +67,8 @@ class ScriptWriterAgent:
                 response_schema=ScriptResult,
             ),
         )
+
+        record_gemini_usage("script writing", "gemini-2.5-flash", response.usage_metadata)
 
         parsed: ScriptResult = response.parsed
         logger.debug(f"Script writer result: {parsed}")
