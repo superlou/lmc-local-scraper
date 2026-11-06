@@ -8,6 +8,7 @@ from google.genai.errors import ServerError
 from google.genai.types import GenerateContentResponse
 from loguru import logger
 from pydantic import BaseModel
+from events_ai.token_usage import record_gemini_usage
 
 
 class Event(BaseModel):
@@ -56,7 +57,7 @@ class GeminiEventResearchAgent(ABC):
                     ),
                 )
 
-                self.count_tokens(response)
+                self.count_tokens(response, model)
                 done = True
             except ServerError as err:
                 if err.code == 503:
@@ -71,11 +72,13 @@ class GeminiEventResearchAgent(ABC):
 
         return response
 
-    def count_tokens(self, response: GenerateContentResponse):
+    def count_tokens(self, response: GenerateContentResponse, model: str):
         if response is None or response.usage_metadata is None:
             return
 
         usage = response.usage_metadata
+
+        record_gemini_usage("website research", model, usage)
 
         self.tokens.prompt += usage.prompt_token_count or 0
         self.tokens.candidates += usage.candidates_token_count or 0

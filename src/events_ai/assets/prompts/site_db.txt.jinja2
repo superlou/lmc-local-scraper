@@ -1,6 +1,7 @@
 You are building a database of events for the communities of the Village of Mamaroneck, Town of Mamaroneck, and Village of Larchmont.
 
 For each event in the following CSV file:
+Keep its original id. Return only id, title, when, where, why, and tags. Links and organizations are restored locally by id; do not invent them.
 
 1. Extract a short title or create one from the event description. The name must be short: no more than 5 or 6 words.
 2. Extract when the event starts, with a date and time. The date should be in MM/DD/YY format, and the time should be in 12-hour format with AM or PM. Don't use a leading zero in the hours. If the time is not known, only provide the date.
@@ -8,7 +9,7 @@ For each event in the following CSV file:
 4. Identify tags for the event. Each event can have multiple tags.
 5. Create a "why" statement. The why statement should be once sentence that clearly, and cleverly, identifies why someone would go to the event.
 
-Ignore (remove) events that are simply announcing a closure.
+Ignore (remove) events that are simply announcing a closure or explicitly cancelled.
 Ignore (remove) events that are more than 7 days before {{today}}.
 Ignore (remove) events that are more than 14 days after {{today}}.
 Combine duplicate events that have the same name, date, and location.
@@ -20,6 +21,8 @@ Examples of tags are:
 * "Music"
 * "Crafting"
 * "Food"
+
+Use the same concise tag names throughout: Kids, Teens, Adults, Music, Crafting, Food, Nature, Wellness, Fitness, Books, Games, Art, Education, Government, Community, Volunteering, Theater, Comedy, Dance, Movies, Festivals, Networking. Add a different tag only when none of these fits.
 
 Try to reduce the number of tags by combining similar tags, e.g., do not have separate tags for "kids" and "kid-friendly."
 
