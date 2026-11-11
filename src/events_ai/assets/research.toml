@@ -5,7 +5,7 @@ url_params = "Keywords=&startDate={events_start:%m/%d/%Y}&enddate={events_finish
 organization = "Village of Mamaroneck"
 
 [mamaroneck_library]
-agent = "FlatEventPageAgent" # The links are images without text, so no point in traversing
+agent = "FlatEventPageAgent"                           # The links are images without text, so no point in traversing
 url = "https://www.mamaronecklibrary.org/events/list/"
 organization = "Mamaroneck Public Library"
 
@@ -105,3 +105,9 @@ organization = "Marine Education Center"
 agent = "FlatEventPageAgent"
 url = "https://www.weinbergnaturecenter.org/upcoming-events"
 organization = "Weinberg Nature Center"
+
+
+[marshlands_conservancy]
+agent = "EventListAgent"
+url = "https://parksevents.westchestercountyny.gov/events/photo/?tribe_venues%5B0%5D=118&hide_subsequent_recurrences=1"
+organization = "Marshlands Conservancy"
