@@ -1,7 +1,7 @@
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 
 from google import genai
 from google.genai.errors import ServerError
@@ -15,7 +15,7 @@ class Event(BaseModel):
     title: str
     link: str | None
     description: str
-    when: str
+    when: date | datetime | None
     location: str
     price: str | None
     target_age: list[str]
