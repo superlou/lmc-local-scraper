@@ -28,6 +28,19 @@
         {% endfor %}
     </table>
 
+    <table>
+        <tr>
+            <th>Organization</th>
+            <th>Events</th>
+        </tr>
+        {% for org, count in overview.org_events.items() %}
+            <tr>
+                <td>{{org}}</td>
+                <td>{{count}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
     {% if overview.traceback %}
         <p><b>Traceback:</b></p>
         <pre style="font-family: monospace;">

@@ -1,11 +1,12 @@
 import os
 from argparse import Namespace
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
 
 import jinja2
+import pandas as pd
 from loguru import logger
 
 from events_ai.mailer import Mailer
@@ -34,6 +35,7 @@ class Overview:
     traceback: str | None = None
     started_at: datetime = datetime.now()
     finished_at: datetime | None = None
+    org_events: dict = field(default_factory=dict)
 
 
 def try_to_attach(mailer: Mailer, file_path: Path, filename: str, mode: str = "r"):
@@ -48,9 +50,19 @@ def send_overview_email(
 ):
     mailer = Mailer("gen-ai-bot@lmc-tv.org", os.environ["GMAIL_USER_APP_PASSWORD"])
     mailer.subject = build_subject(overview)
+
+    events_path = working_dir / "events.csv"
+
+    try:
+        overview.org_events = (
+            pd.read_csv(events_path).groupby("organization").size().to_dict()
+        )
+    except Exception:
+        pass
+
     mailer.body = build_body(overview)
     try_to_attach(mailer, working_dir / "log.txt", f"log_{today}.txt")
-    try_to_attach(mailer, working_dir / "events.csv", f"events_{today}.csv")
+    try_to_attach(mailer, events_path, f"events_{today}.csv")
     try_to_attach(
         mailer, working_dir / "research_tokens.csv", f"research_tokens_{today}.csv"
     )
