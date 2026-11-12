@@ -1,6 +1,7 @@
 import json
 from concurrent.futures import ThreadPoolExecutor
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from multiprocessing import Value
 from pathlib import Path
 
 import pandas as pd
@@ -13,6 +14,23 @@ from events_ai.aws import AWS
 from events_ai.services.gemini_chat_service import GeminiChatService
 from events_ai.services.gemini_image_service import GeminiImageService
 from events_ai.steps.pipeline_step import PipelineStep
+
+
+def when_to_datetime(when: str) -> datetime:
+    """
+    For whatever reason, when is similar to ISO8601 but missing the T. It
+    may be a datetime or simply a date. This function is expected to throw
+    exceptions if it fails to parse `when`.
+    """
+    return datetime.fromisoformat(when.replace(" ", "T"))
+
+
+def when_is_between(when: str, start: date, finish: date) -> bool:
+    try:
+        when_date = when_to_datetime(when).date()
+        return when_date >= start and when_date <= finish
+    except Exception:
+        return False
 
 
 class SiteDBStep(PipelineStep):
@@ -28,6 +46,10 @@ class SiteDBStep(PipelineStep):
         self, today: date, num_featured_events: int, recent_working_dirs: list[Path]
     ):
         df = pd.read_csv(self.events_path, index_col="id")
+        num_all_events = len(df)
+        start = today + timedelta(days=-7)
+        finish = today + timedelta(days=21)
+        df = df[df.when.apply(lambda w: when_is_between(w, start, finish))]
 
         recent_featured_events = []
         for recent_dir in recent_working_dirs:
@@ -46,7 +68,9 @@ class SiteDBStep(PipelineStep):
             except Exception:
                 logger.warning(f"Unable to open recent events for {recent_dir}")
 
-        logger.info(f"Starting to build Site DB from {len(df)} events")
+        logger.info(
+            f"Starting to build Site DB from {len(df)} of {num_all_events} events"
+        )
 
         site_db = SiteDB()
         chat = GeminiChatService("gemini-3.5-flash-lite")
