@@ -49,7 +49,7 @@ class SiteDBStep(PipelineStep):
         logger.info(f"Starting to build Site DB from {len(df)} events")
 
         site_db = SiteDB()
-        chat = GeminiChatService("gemini-2.5-flash")
+        chat = GeminiChatService("gemini-3.5-flash-lite")
 
         # Standardize and analyze all events
         prompt = build_prompt("site_db.txt.jinja2", csv=df.to_csv(), today=today)
