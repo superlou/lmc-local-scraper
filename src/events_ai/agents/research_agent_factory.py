@@ -4,7 +4,7 @@ from google import genai
 
 from events_ai.agents.event_list_agent import EventListAgent
 from events_ai.agents.flat_event_page_agent import FlatEventPageAgent
-from events_ai.agents.gemini_event_research_agent import GeminiEventResearchAgent
+from events_ai.agents.markdown_events_agent import MarkdownEventsAgent
 from events_ai.agents.revize_json_agent import ReviseJSONAgent
 
 
@@ -38,6 +38,10 @@ class ResearchAgentFactory:
                 kwargs.get("url", ""),
                 kwargs.get("organization", ""),
                 kwargs.get("default_link", ""),
+            )
+        elif agent_type == "MarkdownEventsAgent":
+            return MarkdownEventsAgent(
+                llm, events_start, events_finish, kwargs.get("url", "")
             )
         else:
             raise ValueError(f"Couldn't create research agent of type '{agent_type}'")

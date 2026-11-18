@@ -111,3 +111,8 @@ organization = "Weinberg Nature Center"
 agent = "EventListAgent"
 url = "https://parksevents.westchestercountyny.gov/events/photo/?tribe_venues%5B0%5D=118&hide_subsequent_recurrences=1"
 organization = "Marshlands Conservancy"
+
+[creative_corner]
+agent = "MarkdownEventsAgent"
+url = "manual/creative_corner.md"
+organization = "Creative Corner"
